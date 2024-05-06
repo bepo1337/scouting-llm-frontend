@@ -1,25 +1,16 @@
 import { useState } from 'react'
+import NavBar from './components/NavBar'
+import Chat from './components/Chat'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
+    <div className='flex flex-col gap-y-4 p-4 w-full'>
+      <NavBar/>
+      <div className='min-w-[80%] p-4 self-center md:min-w-[40%]'>
+      <Chat ></Chat>
       </div>
-      <h1>Vite + React</h1>
-      <div >
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="text-red-600">
-        Click on the Vite and React2 logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
