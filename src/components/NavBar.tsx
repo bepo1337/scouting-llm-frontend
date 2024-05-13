@@ -12,6 +12,31 @@ export default function NavBar() {
                 </NavigationMenuItem>
             </NavigationMenuList>
             <NavigationMenuList>
+            <Link href="https://github.com/bepo1337/scouting-llm-frontend">
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Scouting as prompt
+                        </NavigationMenuLink>
+                    </Link>
+            </NavigationMenuList>
+            <NavigationMenuList>
+                <NavigationMenuItem>
+                    <Link href="https://github.com/bepo1337/scouting-llm-frontend">
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Visualizations
+                        </NavigationMenuLink>
+                    </Link>
+                </NavigationMenuItem>
+            </NavigationMenuList>
+            <NavigationMenuList>
+                <NavigationMenuItem>
+                    <Link href="https://github.com/bepo1337/scouting-llm-frontend">
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            Chat
+                        </NavigationMenuLink>
+                    </Link>
+                </NavigationMenuItem>
+            </NavigationMenuList>
+            <NavigationMenuList>
                 <NavigationMenuItem>
                     <Link href="https://github.com/bepo1337/scouting-llm-frontend">
                         <NavigationMenuLink className={navigationMenuTriggerStyle()}>

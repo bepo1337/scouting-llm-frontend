@@ -43,7 +43,7 @@ export default function Chat() {
               )}
             />
             {showResponse && <PlayerList></PlayerList>}
-            <Button type="submit">Find Messi now</Button>
+            <Button type="submit">Find next Messi now!</Button>
           </form>
         </Form>
       )
