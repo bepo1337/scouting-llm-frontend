@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import ScoutingAsPrompt from './components/ScoutingAsPrompt';
 import Chat from './components/Chat';
+import SouthAmericaMap from './components/Map';
+import Graph from './components/Graph';
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
           <Routes>
             <Route path="/" element={<ScoutingAsPrompt ></ScoutingAsPrompt>} />
             <Route path="/chat" element={<Chat></Chat>} />
+            <Route path="/map" element={<SouthAmericaMap></SouthAmericaMap>} />
+            <Route path="/graph" element={<Graph></Graph>} />
           </Routes>
         </div>
       </Router>
