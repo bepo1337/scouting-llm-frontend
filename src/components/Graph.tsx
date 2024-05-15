@@ -17,11 +17,16 @@ const Graph: React.FC = () => {
 
   useEffect(() => {
     const nodes = new DataSet<Node>([
-      { id: 1, label: 'Node 1' },
-      { id: 2, label: 'Node 2' },
-      { id: 3, label: 'Node 3' },
-      { id: 4, label: 'Node 4' },
-      { id: 5, label: 'Node 5' }
+      { id: 1, label: 'Luka Jovic' },
+      { id: 2, label: 'Andre Silva' },
+      { id: 3, label: 'Hugo Ekitike' },
+      { id: 4, label: 'Kevin de Bruyne' },
+      { id: 5, label: 'Neymar' },
+      { id:6 , label: 'Mbappe' },
+      { id: 7, label: 'Ibrahimovic' },
+      { id: 8, label: 'Kolo Muani' },
+      { id: 9, label: 'Cavani' },
+      { id: 10, label: 'Messi' }
     ]);
 
     const edges = new DataSet<Edge>([
@@ -30,7 +35,12 @@ const Graph: React.FC = () => {
       { from: 2, to: 3 },
       { from: 2, to: 4 },
       { from: 3, to: 5 },
-      { from: 4, to: 5 }
+      { from: 4, to: 5 },
+      { from: 5, to: 6 } ,
+      { from: 6, to: 7 } ,
+      { from: 6, to: 8 } ,
+      { from: 6, to: 9 } ,
+      { from: 6, to: 10 } 
     ]);
 
     const data = {

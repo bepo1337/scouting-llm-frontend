@@ -31,32 +31,62 @@ const MapChart: React.FC = () => {
       </Geographies>
       <Annotation
         subject={[2.3522, 48.8566]}
-        dx={-90}
-        dy={-30}
+        dx={-70}
+        dy={0}
         connectorProps={{
-          stroke: "#FF5533",
-          strokeWidth: 3,
+          stroke: "black",
+          strokeWidth: 2,
           strokeLinecap: "round"
         }}
       >
-        <text className="font-bold" x="-8" textAnchor="end" alignmentBaseline="middle" fill="#F53">
-          {"Paris"}
+        <text className="font-bold" x="-8" textAnchor="end" alignmentBaseline="middle" fill="black">
+          {"France - Excel in French speaking club"}
         </text>
       </Annotation>
       <Annotation
-        subject={[12.3522, 41.8566]}
+        subject={[12.3522, 42.8566]}
         dx={-90}
-        dy={-30}
+        dy={0}
         connectorProps={{
           stroke: "blue",
-          strokeWidth: 3,
+          strokeWidth: 2,
           strokeLinecap: "round"
         }}
       >
-        <text className="font-mono"x="-8" textAnchor="end" alignmentBaseline="middle" fill="blue">
-          {"Italy: Good wingers, bad habits"}
+        <text className="font-bold"x="-8" textAnchor="end" alignmentBaseline="middle" fill="blue">
+          {"Italy: Good wingers, like to dive"}
         </text>
       </Annotation>
+      <Annotation
+        subject={[12.3522, 52.8566]}
+        dx={-90}
+        dy={-30}
+        connectorProps={{
+          stroke: "red",
+          strokeWidth: 2,
+          strokeLinecap: "round"
+        }}
+      >
+        <text className="font-bold"x="-8" textAnchor="end" alignmentBaseline="middle" fill="red">
+          {"Germany: No good strikers, good morale"}
+        </text>
+      </Annotation>
+
+      <Annotation
+        subject={[22.3522, 38.8566]}
+        dx={0}
+        dy={30}
+        connectorProps={{
+          stroke: "green",
+          strokeWidth: 2,
+          strokeLinecap: "round"
+        }}
+      >
+        <text className="font-bold"x="-8" textAnchor="end" alignmentBaseline="middle" fill="green">
+          {"Greece: Excellent dribbling and strong mental game"}
+        </text>
+      </Annotation>
+
     </ComposableMap>
   );
 };
