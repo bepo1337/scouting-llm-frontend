@@ -1,7 +1,7 @@
 import React from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
-type Player = {
+export type Player = {
     name: string;
     tmLink: string;
     summary: string;

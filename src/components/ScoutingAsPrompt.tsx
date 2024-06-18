@@ -3,9 +3,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import PlayerList from "./PlayerList"
+import PlayerList, { Player } from "./PlayerList"
 import { Button } from "./ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
+import { BASE_URL } from "@/config/constants"
+import axios from 'axios'
 
 const dummyPlayerList: Player[] = [
   {
@@ -44,9 +46,16 @@ const dummyPlayerList: Player[] = [
   }
 ]
 
+export type PlayerAPIResponse = {
+  player_id: number;
+  report_summary: string;
+}
 export default function Chat() {
-    const [showResponse, setShowResponse] = useState(false)
-    const [playerList, setPlayerList] = useState([])
+  
+const api = axios.create({
+  baseURL: BASE_URL
+})
+    const [playerList, setPlayerList] = useState<Player[]>([])
 
 
     const formSchema = z.object({
@@ -60,12 +69,31 @@ export default function Chat() {
         },
     })
 
+    const convertToPlayerList = (data: PlayerAPIResponse[]) => {
+      let players: Player[] = []
+      for(const element of data) {
+        const player: Player = {
+          img: "https://img.a.transfermarkt.technology/portrait/big/257462-1657519856.jpg?lm=1",
+          tmLink: "https://www.transfermarkt.de/spieler/profil/spieler/" + element.player_id,
+          summary: element.report_summary,
+          name: "platzhalter-name"
 
+        }
+        players.push(player)
+      }
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-      // fetch mir die Daten (async await)
-      // set the playerlist 
-      setShowResponse(!showResponse)
+      console.log(players)
+       return players
+    }
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+      console.log("starting request against backend")
+      const query = values.prompt
+      const response = await api.post("scout-prompt", {query})
+      console.log(response)
+
+      let convertedPlayers = convertToPlayerList(response.data.response.list)
+      setPlayerList(convertedPlayers)
     }
 
     return (
@@ -84,7 +112,7 @@ export default function Chat() {
                 </FormItem>
               )}
             />
-            {showResponse && <PlayerList playerList={dummyPlayerList}></PlayerList>}
+            {<PlayerList playerList={playerList}></PlayerList>}
             <Button type="submit">Find next Messi now!</Button>
           </form>
         </Form>
