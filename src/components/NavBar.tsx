@@ -8,7 +8,7 @@ export default function NavBar() {
         <NavigationMenu>
             <NavigationMenuList>
                 <NavigationMenuItem>
-                    <img className="h-12 rounded-sm" src="https://upload.wikimedia.org/wikipedia/commons/9/98/UHH_Universit%C3%A4t_Hamburg_Logo.svg" />
+                    <img className="h-12 rounded-sm" src="../../public/logo_crop.jpg" />
                 </NavigationMenuItem>
             </NavigationMenuList>
             <NavigationMenuList>
