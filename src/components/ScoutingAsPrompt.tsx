@@ -52,8 +52,6 @@ export default function Chat() {
         imageURL: playerData.image
       }
 
-      console.log("returnvalue of fetchNameAndImage", nameAndImage)
-
       return nameAndImage
     } catch (error) {
       console.error("error fetching TM api data")
@@ -69,12 +67,9 @@ export default function Chat() {
       let imageURL = ""
 
       await fetchNameAndImage(element.player_id).then(nameAndImage => {
-        console.log("inside fetch", nameAndImage)
         name = nameAndImage.name
         imageURL = nameAndImage.imageURL
       })
-
-      console.log("name: ",name)
 
       const player: Player = {
         img: imageURL,
@@ -83,25 +78,19 @@ export default function Chat() {
         name: name
       }
 
-      console.log(player)
-
       players.push(player)
     }
 
-    console.log(players)
     return players
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log("starting request against backend")
     const query = values.prompt
-    // const response = await api.post("scout-prompt", { query })
-    // console.log(response)
+    const response = await api.post("scout-prompt", { query })
+    console.log(response)
 
-    const listOfApiResponses = [{ player_id: 257462, report_summary: "some summary" }]
-    // let convertedPlayers = convertToPlayerList(response.data.response.list)
-    let convertedPlayers = await convertToPlayerList(listOfApiResponses)
-    console.log("converted players: ", convertedPlayers)
+    let convertedPlayers = await convertToPlayerList(response.data.response.list)
     setPlayerList(convertedPlayers)
   }
 
