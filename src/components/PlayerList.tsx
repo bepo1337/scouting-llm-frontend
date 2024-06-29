@@ -13,13 +13,13 @@ type PlayerListType = {
 }
 
 
-export default function PlayerList({playerList}: PlayerListType) {
+export default function PlayerList({ playerList }: PlayerListType) {
     const listItems = playerList.map(player => {
-       return <Accordion type="single" collapsible>
+        return <Accordion type="single" collapsible>
             <AccordionItem value="item-1">
                 <div className='flex items-center space-x-4'>
-                <AccordionTrigger>{player.name}</AccordionTrigger>
-                    <img className="h-12 rounded-md" src={player.img}/>
+                    <img className="h-12 rounded-md" src={player.img} />
+                    <AccordionTrigger>{player.name}</AccordionTrigger>
                 </div>
                 <AccordionContent>
                     {player.summary}

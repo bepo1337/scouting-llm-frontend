@@ -21,21 +21,21 @@ export default function NavBar() {
             <NavigationMenuList>
                 <Link href="/map">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Visualization - Map
+                        Visualization - Map ⚒️
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
             <NavigationMenuList>
                 <Link href="/graph">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Visualization - Graph
+                        Visualization - Graph ⚒️
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
             <NavigationMenuList>
                 <Link href="/chat">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Chat
+                        Chat ⚒️
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
