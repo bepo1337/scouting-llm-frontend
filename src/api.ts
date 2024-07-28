@@ -49,7 +49,8 @@ export const convertToPlayerList = async (data: PlayerAPIResponse[]) => {
   return players;
 };
 
-export const scoutPlayers = async (query: string) => {
-  const response = await api.post('scout-prompt', { query });
+export const scoutPlayers = async (query: string, position: string) => {
+  console.log(position)
+  const response = await api.post('scout-prompt', { query, position });
   return convertToPlayerList(response.data.response.list);
 };
