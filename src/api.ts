@@ -37,7 +37,7 @@ export const convertToPlayerList = async (data: PlayerAPIResponse[]) => {
   const players = await Promise.all(
     data.map(async (element) => {
       const { name, imageURL } = await fetchNameAndImage(element.player_id);
-      
+
       return {
         img: imageURL,
         tmLink: `https://www.transfermarkt.de/spieler/profil/spieler/${element.player_id}`,
@@ -53,3 +53,9 @@ export const scoutPlayers = async (query: string, position: string) => {
   const response = await api.post('scout-prompt', { query, position });
   return convertToPlayerList(response.data.response.list);
 };
+
+// TODO Only have summary in frontend. But if we want user to see refernces, we can also get them here anyways and send them back.
+export const reactionToSummary = async (playerID: string, summary: string) => {
+  api.post('reaction', { playerID, summary });
+};
+

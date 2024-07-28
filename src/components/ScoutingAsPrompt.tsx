@@ -1,4 +1,6 @@
 import { scoutPlayers } from "@/api"
+import { dummyPlayerList } from "@/dummydata"
+
 import { Textarea } from "@/components/ui/textarea"
 import { Positions } from "@/config/constants"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,7 +19,8 @@ const formSchema = z.object({
 })
 
 export default function Chat() {
-  const [playerList, setPlayerList] = useState<Player[]>([])
+  //TODO remove dummies again
+  const [playerList, setPlayerList] = useState<Player[]>(dummyPlayerList)
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
