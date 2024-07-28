@@ -50,7 +50,6 @@ export const convertToPlayerList = async (data: PlayerAPIResponse[]) => {
 };
 
 export const scoutPlayers = async (query: string, position: string) => {
-  console.log(position)
   const response = await api.post('scout-prompt', { query, position });
   return convertToPlayerList(response.data.response.list);
 };
