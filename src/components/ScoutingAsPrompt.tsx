@@ -85,7 +85,7 @@ return (
         )}
       />
 
-      {<PlayerList playerList={playerList}></PlayerList>}
+      {<PlayerList playerList={playerList} query={form.getValues().prompt}></PlayerList>}
       {!isLoading && <Button type="submit" >Submit</Button>}
       {isLoading &&
         <>
