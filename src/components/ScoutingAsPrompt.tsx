@@ -19,7 +19,6 @@ const formSchema = z.object({
 })
 
 export default function Chat() {
-  //TODO remove dummies again
   const [playerList, setPlayerList] = useState<Player[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
