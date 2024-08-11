@@ -84,8 +84,9 @@ export default function Chat() {
   return (
     <div className="w-full flex items-center justify-center ">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-8 space-x-24 border-r-2 pr-6 flex">
-          <div className="flex flex-col w-min space-y-7 !mt-10">  
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-8 border-r-2 pr-6 flex">
+          <div className="flex flex-col w-min space-y-7 !mt-10 border-r-2 pr-10">  
+          <h2 className="text-2xl font-bold">Optional parameters</h2>
             <FormField
             control={form.control}
             name="fineGrained"
@@ -129,7 +130,7 @@ export default function Chat() {
                 </FormItem>
               )}
             /></div>
-          <div className="flex flex-col w-full space-y-7 !mt-0">
+          <div className="flex flex-col w-full space-y-7 !mt-0 pl-10 ">
             <FormField
               control={form.control}
               name="prompt"
