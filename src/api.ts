@@ -60,3 +60,10 @@ export const sendReaction = async (query: string, playerID: number, summary: str
   api.post('reaction', { query, playerID, summary, reaction });
 };
 
+export const getOriginaLReports = (playerID: number)=> {
+  const path = 'original-reports/' + playerID
+  const response = api.get<string[]>(path);
+  return response
+};
+
+

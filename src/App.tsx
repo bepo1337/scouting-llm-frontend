@@ -10,7 +10,7 @@ function App() {
     <div className='flex flex-col gap-y-4 p-4 w-full'>
       <Router>
         <NavBar></NavBar>
-        <div className='w-1/2 p-4 self-center '>
+        <div className='p-4 self-center w-full flex justify-center'>
           <Routes>
             <Route path="/" element={<ScoutingAsPrompt ></ScoutingAsPrompt>} />
             <Route path="/chat" element={<Chat></Chat>} />

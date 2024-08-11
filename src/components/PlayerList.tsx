@@ -1,7 +1,7 @@
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { sendReaction } from '@/api';
+import { getOriginaLReports, sendReaction } from '@/api';
 
 export type Player = {
     id: number;
@@ -12,13 +12,15 @@ export type Player = {
 }
 
 type PlayerListProps = {
+    playerListToParent: (playerId: number) => void;
     playerList: Player[];
     query: string;
 }
 
 
-export default function PlayerList({ playerList, query }: PlayerListProps) {
+export default function PlayerList({ playerListToParent, playerList, query }: PlayerListProps) {
     const [reactions, setReactions] = useState<{ [key: number]: string | null }>({});
+
 
     const getSummaryForPlayer = (id: number) => {
         for (const player of playerList) {
@@ -26,7 +28,7 @@ export default function PlayerList({ playerList, query }: PlayerListProps) {
                 return player.summary;
             }
         }
-        
+
         return "EMPTY_SUMMARY";
     }
 
@@ -43,12 +45,16 @@ export default function PlayerList({ playerList, query }: PlayerListProps) {
         // later also the references, but for now just this?
     };
 
+    const callCallbackFunc = (playerID: string) => {
+        playerListToParent(Number(playerID))
+    }
+
     const listItems = playerList.map((player) => {
         const playerReaction = reactions[player.id];
 
         return (
-            <Accordion key={player.tmLink} type="single" collapsible>
-                <AccordionItem value="item-1">
+            <Accordion key={player.tmLink} type="single" collapsible onValueChange={callCallbackFunc}>
+                <AccordionItem value={`${player.id}`}>
                     <div className="flex items-center space-x-4">
                         <img className="h-12 rounded-md" src={player.img} alt={player.name} />
                         <AccordionTrigger>{player.name}</AccordionTrigger>
