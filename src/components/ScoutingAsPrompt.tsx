@@ -58,7 +58,7 @@ export default function Chat() {
           control={form.control}
           name="fineGrained"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm w-1/2">
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm w-3/5 min-w-80">
               <div className="space-y-0.5">
                 <FormLabel>Fine grained search</FormLabel>
                 <FormDescription>
@@ -78,8 +78,11 @@ export default function Chat() {
           control={form.control}
           name="position"
           render={({ field }) => (
-            <FormItem className="w-1/2">
-              <FormLabel>Position (optional)</FormLabel>
+            <FormItem className="w-3/5 min-w-80">
+              <FormLabel>Position</FormLabel>
+              <FormDescription>
+                  Optional. Can limit the results because players that didn't play their main position won't be found. 
+                </FormDescription>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
