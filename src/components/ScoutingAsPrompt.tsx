@@ -114,7 +114,7 @@ export default function Chat() {
                 <FormItem className="w-3/5 min-w-80">
                   <FormLabel>Position</FormLabel>
                   <FormDescription>
-                    Optional. Can limit the results because players that didn't play their main position won't be found.
+                   Can limit the results because players that didn't play their main position won't be found.
                   </FormDescription>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
