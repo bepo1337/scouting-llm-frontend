@@ -146,7 +146,7 @@ export default function Chat() {
             />
 
             {<PlayerList playerListToParent={setPlayerAndReports} playerList={playerList} query={form.getValues().prompt}></PlayerList>}
-            {!isLoading && <Button className="w-min" type="submit" >Submit</Button>}
+            {!isLoading && <Button className="w-min" type="submit" >Scout</Button>}
             {isLoading &&
               <>
                 <Skeleton></Skeleton>

@@ -14,7 +14,14 @@ export default function NavBar() {
             <NavigationMenuList>
                 <Link href="/">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Scouting as prompt
+                        Scouting as prompt ✨
+                    </NavigationMenuLink>
+                </Link>
+            </NavigationMenuList>
+            <NavigationMenuList>
+                <Link href="/compare">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        Compare players ⚖
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
