@@ -21,7 +21,7 @@ function OriginalReports({ reports }: OriginalReportsProps) {
 
     return (
         <>
-            <h1 className='font-bold text-3xl mb-8'>{reports.length == 0 ? "Select a player to see original reports" : "Original reports"}</h1>
+            <h1 className='text-2xl mb-8'>{reports.length == 0 ? "Select a player to see original reports" : "Original reports"}</h1>
             <div className='flex flex-col space-y-4'>{reportItems}</div></>
     )
 }
