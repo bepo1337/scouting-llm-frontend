@@ -23,29 +23,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "./ui/use-toast"
+import { getAllPlayersWithNames, IDAndName } from "@/api"
 
-const frameworks = [
-    {
-        value: "next.js",
-        label: "Next.js",
-    },
-    {
-        value: "sveltekit",
-        label: "SvelteKit",
-    },
-    {
-        value: "nuxt.js",
-        label: "Nuxt.js",
-    },
-    {
-        value: "remix",
-        label: "Remix",
-    },
-    {
-        value: "astro",
-        label: "Astro",
-    },
-]
+interface LabelValue {
+    value: string;
+    label: string;
+}
 
 const FormSchema = z.object({
     player_left: z.string({
@@ -62,8 +45,27 @@ export default function ComparePlayers() {
     const [open_right, setOpenRight] = React.useState(false)
     const [valueLeft, setValueLeft] = React.useState("")
     const [valueRight, setValueRight] = React.useState("")
+    const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = React.useState<LabelValue[]>([])
+
 
     //TODO on load of component, get all player ids from backend form rdbms
+    React.useEffect(() => {
+        const fetchPlayerIdWithNames = async () => {
+            const response = await getAllPlayersWithNames()
+            const playersList = response.data
+            const shortPlayers = playersList.slice(0, 100)
+
+            const playerLabelValue = shortPlayers.map((player: { id: number; name: string }) => ({
+                value: player.id.toString(),
+                label: player.name,
+            }));
+    
+            setPlayerDataLabelAndValue(playerLabelValue);
+            
+        }
+        fetchPlayerIdWithNames()
+    }, []) //need the empty array as second arguement, otherwise our backend endpoint will be called constantly
+
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -99,18 +101,19 @@ export default function ComparePlayers() {
                                             className="w-[200px] justify-between"
                                         >
                                             {valueLeft
-                                                ? frameworks.find((framework) => framework.value === valueLeft)?.label
+                                                ? playerDataLabelAndValue.find((framework) => framework.value === valueLeft)?.label
                                                 : "Select player..."}
                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-[200px] p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search player..." className="h-9" />
+                                    {/* TODO https://github.com/shadcn-ui/ui/discussions/3332 muss man hier selber was mit filter implementieren mit dynamischen daten*/}
+                                        <Command shouldFilter>
+                                        <CommandInput placeholder="Search player..." className="h-9"/>
                                             <CommandList>
                                                 <CommandEmpty>No player found.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {frameworks.map((framework) => (
+                                                    {playerDataLabelAndValue.map((framework) => (
                                                         <CommandItem
                                                             key={framework.value}
                                                             value={framework.value}
@@ -156,18 +159,18 @@ export default function ComparePlayers() {
                                             className="w-[200px] justify-between"
                                         >
                                             {valueRight
-                                                ? frameworks.find((framework) => framework.value === valueRight)?.label
+                                                ? playerDataLabelAndValue.find((framework) => framework.value === valueRight)?.label
                                                 : "Select second player..."}
                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-[200px] p-0">
-                                        <Command>
+                                        <Command > 
                                             <CommandInput placeholder="Search player..." className="h-9" />
                                             <CommandList>
                                                 <CommandEmpty>No player found.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {frameworks.map((framework) => (
+                                                    {playerDataLabelAndValue.map((framework) => (
                                                         <CommandItem
                                                             key={framework.value}
                                                             value={framework.value}

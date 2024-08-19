@@ -5,6 +5,11 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
+export type IDAndName = {
+  id: number;
+  name: string;
+}
+
 export type NameAndImage = {
   name: string;
   imageURL: string;
@@ -60,10 +65,21 @@ export const sendReaction = async (query: string, playerID: number, summary: str
   api.post('reaction', { query, playerID, summary, reaction });
 };
 
+//TODO suffix "/" korrekt?
 export const getOriginaLReports = (playerID: number)=> {
   const path = 'original-reports/' + playerID
   const response = api.get<string[]>(path);
   return response
 };
+
+
+
+export const getAllPlayersWithNames = () => {
+  const path = 'players-with-name'
+  const response = api.get<IDAndName[]>(path);
+  return response
+};
+
+
 
 
