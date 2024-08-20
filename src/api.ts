@@ -80,6 +80,11 @@ export const getAllPlayersWithNames = () => {
   return response
 };
 
+export async function fetchSimilarPlayers(playerID: number) {
+  const path = 'similar_players/' + playerID
+  const response = await api.get(path);
+  return response.data;
+} 
 
 
 
