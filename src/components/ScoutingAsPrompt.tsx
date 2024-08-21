@@ -1,6 +1,4 @@
 import { scoutPlayers, getOriginaLReports } from "@/api"
-import { dummyPlayerList } from "@/dummydata"
-
 import { Textarea } from "@/components/ui/textarea"
 import { Positions } from "@/config/constants"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,8 +11,6 @@ import { Button } from "./ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Switch } from "./ui/switch"
-import { Card } from "./ui/card"
-import { Separator } from "./ui/separator"
 import OriginalReports from "./OriginalReports"
 
 type OriginalReportsAndFineGrainedReport = {
