@@ -8,6 +8,7 @@ export type Player = {
     name: string;
     tmLink: string;
     summary: string;
+    fineGrainedReports: string[];
     img: string;
 }
 

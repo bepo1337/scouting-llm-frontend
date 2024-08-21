@@ -3,11 +3,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 
 type OriginalReportsProps = {
     reports: string[];
+    fineGrainedReport: string;
 }
 
 
-function OriginalReports({ reports }: OriginalReportsProps) {
+function OriginalReports({ reports, fineGrainedReport }: OriginalReportsProps) {
 
+    //TODO hier filtern wenn fineGrainedReport existiert, dass der dann nicht als noramler report auftaucht
     const reportItems = reports.map((report) => {
         return (
             <Card className="h-max">
@@ -22,6 +24,9 @@ function OriginalReports({ reports }: OriginalReportsProps) {
     return (
         <>
             <h1 className='text-2xl mb-8'>{reports.length == 0 ? "Select a player to see original reports" : "Original reports"}</h1>
+            <div>
+                {fineGrainedReport !== "" && <div>This fine grained report is shown: {fineGrainedReport}</div>}
+            </div>
             <div className='flex flex-col space-y-4'>{reportItems}</div></>
     )
 }

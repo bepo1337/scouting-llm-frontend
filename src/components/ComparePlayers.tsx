@@ -46,6 +46,7 @@ export default function ComparePlayers() {
     const [valueLeft, setValueLeft] = React.useState("")
     const [valueRight, setValueRight] = React.useState("")
     const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = React.useState<LabelValue[]>([])
+    const [searchTerm, setSearchTerm] = React.useState('');
 
 
     //TODO on load of component, get all player ids from backend form rdbms
@@ -66,6 +67,9 @@ export default function ComparePlayers() {
         fetchPlayerIdWithNames()
     }, []) //need the empty array as second arguement, otherwise our backend endpoint will be called constantly
 
+    const filteredOptions = playerDataLabelAndValue.filter((player) =>
+        player.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -101,32 +105,33 @@ export default function ComparePlayers() {
                                             className="w-[200px] justify-between"
                                         >
                                             {valueLeft
-                                                ? playerDataLabelAndValue.find((framework) => framework.value === valueLeft)?.label
+                                                ? playerDataLabelAndValue.find((player) => player.value === valueLeft)?.label
                                                 : "Select player..."}
                                             <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-[200px] p-0">
                                     {/* TODO https://github.com/shadcn-ui/ui/discussions/3332 muss man hier selber was mit filter implementieren mit dynamischen daten*/}
-                                        <Command shouldFilter>
-                                        <CommandInput placeholder="Search player..." className="h-9"/>
+                                    {/* https://github.com/pacocoursey/cmdk */}
+                                        <Command shouldFilter={false}>
+                                        <CommandInput placeholder="Search player..." className="h-9"  value={searchTerm} onValueChange={setSearchTerm} />
                                             <CommandList>
                                                 <CommandEmpty>No player found.</CommandEmpty>
                                                 <CommandGroup>
-                                                    {playerDataLabelAndValue.map((framework) => (
+                                                    {filteredOptions.map((playerLeft) => (
                                                         <CommandItem
-                                                            key={framework.value}
-                                                            value={framework.value}
+                                                            key={playerLeft.value}
+                                                            value={playerLeft.label}
                                                             onSelect={(currentValue) => {
                                                                 setValueLeft(currentValue === valueLeft ? "" : currentValue)
                                                                 setOpenLeft(false)
                                                             }}
                                                         >
-                                                            {framework.label}
+                                                            {playerLeft.label}
                                                             <CheckIcon
                                                                 className={cn(
                                                                     "ml-auto h-4 w-4",
-                                                                    valueLeft === framework.value ? "opacity-100" : "opacity-0"
+                                                                    valueLeft === playerLeft.label ? "opacity-100" : "opacity-0"
                                                                 )}
                                                             />
                                                         </CommandItem>

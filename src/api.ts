@@ -34,7 +34,9 @@ export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage>
 };
 
 export type PlayerAPIResponse = {
+  // hier list emit finegrained reports 
   player_id: number;
+  fine_grained_reports: string[];
   report_summary: string;
 };
 
@@ -48,6 +50,7 @@ export const convertToPlayerList = async (data: PlayerAPIResponse[]) => {
         img: imageURL,
         tmLink: `https://www.transfermarkt.de/spieler/profil/spieler/${element.player_id}`,
         summary: element.report_summary,
+        fineGrainedReports: element.fine_grained_reports,
         name,
       };
     })

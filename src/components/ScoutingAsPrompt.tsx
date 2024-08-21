@@ -17,6 +17,12 @@ import { Card } from "./ui/card"
 import { Separator } from "./ui/separator"
 import OriginalReports from "./OriginalReports"
 
+type OriginalReportsAndFineGrainedReport = {
+  reports: string[];
+  fineGrainedReport: string;
+}
+
+
 const formSchema = z.object({
   prompt: z.string().min(2).max(1000),
   position: z.string().min(0).max(1000),
@@ -26,19 +32,32 @@ const formSchema = z.object({
 export default function Chat() {
   const [playerList, setPlayerList] = useState<Player[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedPlayerID, setSelectedPlayerID] = useState<number>(0)
+  const [selectedPlayerID, setSelectedPlayerID] = useState<number>(0) //TODO kann eigentlich raus? wird ja nicht verwendet
   const [originalReports, setOriginalReports] = useState<string[]>([])
-  const [playerToReports, setPlayerToReports] = useState<{ [key: number]: string[] }>({});
+  const [fineGrainedReportState, setFineGrainedReportState] = useState<string>("")
+  // hier muss eine andere DS her, key --> {[]string und highlightedreport}
+  const [playerToReports, setPlayerToReports] = useState<{ [key: number]: OriginalReportsAndFineGrainedReport }>({});
+
 
   useEffect(() => {
     const fetchReports = async () => {
-      const fetchedReports: { [key: number]: string[] } = {};
+      const fetchedReports: { [key: number]: OriginalReportsAndFineGrainedReport } = {};
       for (const player of playerList) {
         const response = await getOriginaLReports(player.id)
-        fetchedReports[player.id] = response.data
+        let reports = response.data
+        let fineGrainedRep = ""
+        if (player.fineGrainedReports.length > 0) {
+          fineGrainedRep = player.fineGrainedReports[0]
+        }
+
+        const reportsWithFineGrainedRep : OriginalReportsAndFineGrainedReport = {
+          reports: reports, 
+          fineGrainedReport: fineGrainedRep 
+        };    
+
+        fetchedReports[player.id] = reportsWithFineGrainedRep
       }
       setPlayerToReports(fetchedReports);
-      console.log(playerToReports)
     };
     fetchReports();
   }, [playerList]);
@@ -74,9 +93,12 @@ export default function Chat() {
     if (playerID == 0) {
       setSelectedPlayerID(0)
       setOriginalReports([])
+      setFineGrainedReportState("")
+
     } else {
       setSelectedPlayerID(playerID)
-      setOriginalReports(playerToReports[playerID])
+      setOriginalReports(playerToReports[playerID].reports)
+      setFineGrainedReportState(playerToReports[playerID].fineGrainedReport)
     }
   }
 
@@ -161,7 +183,8 @@ export default function Chat() {
             }</div>
         </form>
       </Form>
-      <div className="pl-8 w-1/3 self-start max-w-1/2 sticky top-0"> <OriginalReports reports={originalReports} /></div>
+    {/* hier ein prob weiter dur hreichen */}
+      <div className="pl-8 w-1/3 self-start max-w-1/2 sticky top-0"> <OriginalReports reports={originalReports} fineGrainedReport={fineGrainedReportState} /></div> 
 
     </div>
 
