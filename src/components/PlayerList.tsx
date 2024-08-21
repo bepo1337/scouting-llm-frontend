@@ -18,6 +18,11 @@ type PlayerListProps = {
     query: string;
 }
 
+function formatStructuredSummary(summary: string): string {
+    let newSummary = summary.replace(/:\*\*/g, ':<br>').replace(/\*\*/g, "<br><br>").replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
+    return newSummary
+}
+
 
 export default function PlayerList({ playerListToParent, playerList, query }: PlayerListProps) {
     const [reactions, setReactions] = useState<{ [key: number]: string | null }>({});
@@ -52,6 +57,8 @@ export default function PlayerList({ playerListToParent, playerList, query }: Pl
 
     const listItems = playerList.map((player) => {
         const playerReaction = reactions[player.id];
+        const originalSummary = player.summary
+
 
         return (
             <Accordion key={player.tmLink} type="single" collapsible onValueChange={callCallbackFunc}>
@@ -61,7 +68,8 @@ export default function PlayerList({ playerListToParent, playerList, query }: Pl
                         <AccordionTrigger>{player.name}</AccordionTrigger>
                     </div>
                     <AccordionContent>
-                        {player.summary}
+                    <div dangerouslySetInnerHTML={{ __html: formatStructuredSummary(originalSummary) }} />
+                        
                         <br />
                         <br />
                         <a href={player.tmLink} className="text-blue-500 hover:text-blue-800">Go to Transfermarkt profile</a>
