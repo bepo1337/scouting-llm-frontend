@@ -29,15 +29,15 @@ const PlayerNetwork: React.FC = () => {
       borderWidth: 5,
       size: 50,
       color: {
-        border: 'blue',
-        background: 'blue',
+        border: '#2B7CE9',
+        background: '#97C2FC',
         highlight: {
-          border: 'blue',
-          background: 'blue'
+          border: '#2B7CE9',
+          background: '#D2E5FF'
         },
         hover: {
-          border: 'blue',
-          background: 'pink'
+          border: '#2B7CE9',
+          background: '#D2E5FF'
         }
       },
       font: {
@@ -46,7 +46,7 @@ const PlayerNetwork: React.FC = () => {
         face: "arial", // Using a clean, readable font
         align: "center", // Centered text
       },
-      //shape: "circularImage",
+      shape: "circularImage",
     },
     edges: {
       color: "#cccccc", // Light gray edges for subtle connections
@@ -90,7 +90,7 @@ const PlayerNetwork: React.FC = () => {
             return {
               id: player.player_transfermarkt_id,
               label: similarPlayerInfo.name,
-              imageURL: similarPlayerInfo.imageURL || 'https://img.a.transfermarkt.technology/portrait/header/default.jpg?lm=1', // Placeholder image if not found
+              image: similarPlayerInfo.imageURL || 'https://img.a.transfermarkt.technology/portrait/header/default.jpg?lm=1', // Placeholder image if not found
               group: 'similar',
             };
           })
@@ -101,7 +101,7 @@ const PlayerNetwork: React.FC = () => {
           {
             id: playerId,
             label: playerInfo.name,
-            imageURL: playerInfo.imageURL,
+            image: playerInfo.imageURL,
             group: 'central',
           },
           ...similarPlayerNodes,
