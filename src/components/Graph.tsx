@@ -26,7 +26,7 @@ const PlayerNetwork: React.FC = () => {
 
   const options: Options = {
     nodes: {
-      borderWidth: 0,
+      borderWidth: 5,
       size: 50,
       color: {
         border: 'blue',
@@ -42,7 +42,7 @@ const PlayerNetwork: React.FC = () => {
       },
       font: {
         color: 'black', // White text for high contrast
-        size: 14, // Slightly larger font size
+        size: 20, // Slightly larger font size
         face: "arial", // Using a clean, readable font
         align: "center", // Centered text
       },
