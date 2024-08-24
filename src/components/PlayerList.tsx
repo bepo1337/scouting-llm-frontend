@@ -18,8 +18,25 @@ type PlayerListProps = {
     query: string;
 }
 
+//TODO suuuuper hacky
+// should probably be a component with some styled text elements
 function formatStructuredSummary(summary: string): string {
-    let newSummary = summary.replace(/:\*\*/g, ':<br>').replace(/\*\*/g, "<br><br>").replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
+    let newSummary = summary.replace(/:\*\*/g, ':').replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
+
+    newSummary = newSummary.replace(/- ([^\n\r]*)/g, '<li>$1</li>');
+    newSummary = newSummary.replace(/General text about the player:/g, '<h3 style="font-size: 1em; font-weight: bold;">General:</h3>');
+    // TODO <br> before h3 cuz idk why theres no br before this one
+    newSummary = newSummary.replace(/Strengths:/g, '<br><h3 style="font-size: 1em; font-weight: bold;">Strenghts:</h3>');
+    newSummary = newSummary.replace(/Weaknesses:/g, '<h3 style="font-size: 1em; font-weight: bold;">Weaknesses:</h3>');
+    newSummary = newSummary.replace(/Physical Capabilities:/g, '<h3 style="font-size: 1em; font-weight: bold;">Physical Capabilities:</h3>');
+    newSummary = newSummary.replace(/Offensive Capabilities:/g, '<h3 style="font-size: 1em; font-weight: bold;">Offensive Capabilities:</h3>');
+    newSummary = newSummary.replace(/Defensive Capabilities:/g, '<h3 style="font-size: 1em; font-weight: bold;">Defensive Capabilities:</h3>');
+    newSummary = newSummary.replace(/Other Attributions:/g, '<h3 style="font-size: 1em; font-weight: bold;">Other Attributions:</h3>');
+
+    //test
+    newSummary = newSummary.replace(/<br><br><h3/g, '<br><h3');
+
+    console.log(newSummary)
     return newSummary
 }
 
@@ -69,7 +86,6 @@ export default function PlayerList({ playerListToParent, playerList, query }: Pl
                     </div>
                     <AccordionContent>
                     <div dangerouslySetInnerHTML={{ __html: formatStructuredSummary(originalSummary) }} />
-                        
                         <br />
                         <br />
                         <a href={player.tmLink} className="text-blue-500 hover:text-blue-800">Go to Transfermarkt profile</a>
