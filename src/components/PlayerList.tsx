@@ -85,10 +85,12 @@ export default function PlayerList({ playerListToParent, playerList, query }: Pl
                         <AccordionTrigger>{player.name}</AccordionTrigger>
                     </div>
                     <AccordionContent>
-                    <div dangerouslySetInnerHTML={{ __html: formatStructuredSummary(originalSummary) }} />
+                        <div dangerouslySetInnerHTML={{ __html: formatStructuredSummary(originalSummary) }} />
                         <br />
                         <br />
-                        <a href={player.tmLink} className="text-blue-500 hover:text-blue-800">Go to Transfermarkt profile</a>
+                        <a href={player.tmLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-800 flex">
+                        Go to <img src="../../public/tm.png" alt="test" style={{ marginLeft: '5px', marginRight: '5px', height: '20px' }} /> profile 🔗
+                        </a>
                         <div className="mt-4 flex space-x-2">
                             <button
                                 onClick={(event) => handleReaction(event, player.id, 'up')}
