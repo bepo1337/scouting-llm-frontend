@@ -26,11 +26,11 @@ export default function NavBar() {
                 </Link>
             </NavigationMenuList>
             <NavigationMenuList>
-                <Link href="/map">
+                {/* <Link href="/map">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                         Visualization - Map ⚒️
                     </NavigationMenuLink>
-                </Link>
+                </Link> */}
             </NavigationMenuList>
             <NavigationMenuList>
                 <Link href="/graph">
