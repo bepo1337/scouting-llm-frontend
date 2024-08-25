@@ -6,7 +6,7 @@ import 'vis-network/styles/vis-network.css';
 interface PlayerNode {
   id: string;
   label: string;
-  imageURL: string;
+  image: string;
   group: string;
 }
 
@@ -18,11 +18,10 @@ interface Edge {
 
 const PlayerNetwork: React.FC = () => {
   const defaultPlayerId = '39049';
-  const [networkData, setNetworkData] = useState<{ nodes: PlayerNode[]; edges: Edge[] }>({ nodes: [], edges: [] });
-  const [currentPlayerId, setCurrentPlayerId] = useState<string>(defaultPlayerId);
-  const [currentPlayerInfo, setCurrentPlayerInfo] = useState<{ name: string; imageURL: string } | null>(null);
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
+  const nodesRef = useRef<DataSet<PlayerNode>>(new DataSet());
+  const edgesRef = useRef<DataSet<Edge>>(new DataSet());
 
   const options: Options = {
     nodes: {
@@ -41,116 +40,150 @@ const PlayerNetwork: React.FC = () => {
         }
       },
       font: {
-        color: 'black', // White text for high contrast
-        size: 20, // Slightly larger font size
-        face: "arial", // Using a clean, readable font
-        align: "center", // Centered text
+        color: 'black',
+        size: 20,
+        face: "arial",
+        align: "center",
       },
       shape: "circularImage",
     },
     edges: {
-      color: "#cccccc", // Light gray edges for subtle connections
+      color: "#cccccc",
       width: 2,
-      hoverWidth: 3, // Slightly thicker on hover for visibility
-      selectionWidth: 3, // Slightly thicker on selection
+      hoverWidth: 3,
+      selectionWidth: 3,
     },
     interaction: {
-      hover: true, // Enable hover effects for better interactivity
+      hover: true,
     },
     physics: {
       enabled: true,
       barnesHut: {
-        gravitationalConstant: -3000, // Adjust gravity for better spacing
-        springLength: 200, // Longer springs for more space between nodes
-        springConstant: 0.04, // Adjust spring strength
+        gravitationalConstant: -3000,
+        springLength: 200,
+        springConstant: 0.04,
       },
     },
   };
 
   useEffect(() => {
-    async function loadPlayerData(playerId: string) {
-      try {
-        // Fetch the current player's name and image
-        const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
-        setCurrentPlayerInfo(playerInfo);
+    loadPlayerData(defaultPlayerId);
+  }, []);
 
-        // Fetch the similar players
-        const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
-        console.log("Fetched similar players:", similarPlayers);
+  const loadPlayerData = async (playerId: string) => {
+    try {
+      const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
+      const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
 
-        if (!playerInfo || !similarPlayers.length) {
-          console.error('No player info or similar players found.');
-          return;
-        }
+      if (!playerInfo || !similarPlayers.length) {
+        console.error('No player info or similar players found.');
+        return;
+      }
 
-        // Fetch the names and images of similar players
-        const similarPlayerNodes = await Promise.all(
-          similarPlayers.map(async (player: { player_transfermarkt_id: any }) => {
+      const centralNode: PlayerNode = {
+        id: playerId,
+        label: playerInfo.name,
+        image: playerInfo.imageURL,
+        group: 'central',
+      };
+
+      nodesRef.current.add(centralNode);
+
+      const similarPlayerNodes = await Promise.all(
+        similarPlayers.map(async (player: { player_transfermarkt_id: string }) => {
+          const similarPlayerInfo = await fetchNameAndImage(parseInt(player.player_transfermarkt_id, 10));
+          return {
+            id: player.player_transfermarkt_id,
+            label: similarPlayerInfo.name,
+            image: similarPlayerInfo.imageURL || 'https://img.a.transfermarkt.technology/portrait/header/default.jpg?lm=1',
+            group: 'similar',
+          };
+        })
+      );
+
+      nodesRef.current.add(
+        similarPlayerNodes.filter(node => !nodesRef.current.get(node.id))
+      );
+
+      edgesRef.current.add(
+        similarPlayers.map((player: { player_transfermarkt_id: any; distance: any }) => ({
+          from: playerId,
+          to: player.player_transfermarkt_id,
+          weight: player.distance,
+        }))
+      );
+
+      if (!networkRef.current) {
+        const network = new Network(networkContainerRef.current!, { nodes: nodesRef.current, edges: edgesRef.current }, options);
+        networkRef.current = network;
+
+        network.on('click', function (params) {
+          if (params.nodes.length > 0) {
+            const clickedPlayerId = params.nodes[0];
+            expandNetwork(clickedPlayerId);
+          }
+        });
+      } else {
+        networkRef.current.setData({ nodes: nodesRef.current, edges: edgesRef.current });
+      }
+
+    } catch (error) {
+      console.error('Error loading player data:', error);
+    }
+  };
+
+  const expandNetwork = async (playerId: string) => {
+    try {
+      const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
+      const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
+
+      if (!playerInfo || !similarPlayers.length) {
+        console.error('No player info or similar players found.');
+        return;
+      }
+
+      // Fetch and filter nodes
+      const similarPlayerNodes = await Promise.all(
+        similarPlayers.map(async (player: { player_transfermarkt_id: string }) => {
             const similarPlayerInfo = await fetchNameAndImage(parseInt(player.player_transfermarkt_id, 10));
             return {
-              id: player.player_transfermarkt_id,
-              label: similarPlayerInfo.name,
-              image: similarPlayerInfo.imageURL || 'https://img.a.transfermarkt.technology/portrait/header/default.jpg?lm=1', // Placeholder image if not found
-              group: 'similar',
+                id: player.player_transfermarkt_id,
+                label: similarPlayerInfo.name,
+                image: similarPlayerInfo.imageURL || 'https://img.a.transfermarkt.technology/portrait/header/default.jpg?lm=1',
+                group: 'similar',
             };
-          })
-        );
+        })
+    );
 
-        // Create nodes for both the current player and similar players
-        const nodes = new DataSet<PlayerNode>([
-          {
-            id: playerId,
-            label: playerInfo.name,
-            image: playerInfo.imageURL,
-            group: 'central',
-          },
-          ...similarPlayerNodes,
-        ]);
+    nodesRef.current.add(
+        similarPlayerNodes.filter(node => !nodesRef.current.get(node.id))
+    );
 
-        console.log("Nodes:", nodes);
+    // Filter out duplicate edges before adding
+    const newEdges = similarPlayers.map((player: { player_transfermarkt_id: string; distance: number }) => ({
+        from: playerId,
+        to: player.player_transfermarkt_id,
+        weight: player.distance,
+    }));
 
-        // Create edges between the current player and similar players
-        const edges = new DataSet<Edge>(
-          similarPlayers.map((player: { player_transfermarkt_id: any; distance: any }) => ({
-            from: playerId,
-            to: player.player_transfermarkt_id,
-            weight: player.distance,
-          }))
-        );
+    const filteredEdges = newEdges.filter((edge: { from: any; to: any; }) => {
+        // Check if the edge already exists
+        const existingEdge = edgesRef.current.get({
+            filter: (item: { from: any; to: any; }) => item.from === edge.from && item.to === edge.to
+        });
+        return existingEdge.length === 0; // Only add if no matching edge exists
+    });
 
-        console.log("Edges:", edges);
+    edgesRef.current.add(filteredEdges);
 
-        const data = {
-          nodes: nodes,
-          edges: edges,
-        };
-        
+      console.log('expanded network:', nodesRef.current, edgesRef.current);
 
-        // Create or update the network visualization
-        if (networkRef.current) {
-          networkRef.current.setData(data);
-          networkRef.current.setOptions(options);
-        } else {
-          const network = new Network(networkContainerRef.current!, data, options);
-          network.setOptions(options);
-          networkRef.current = network;
+      networkRef.current?.setData({ nodes: nodesRef.current, edges: edgesRef.current });
 
-          // Add event listener to handle node clicks
-          network.on('click', function (params) {
-            if (params.nodes.length > 0) {
-              const playerId = params.nodes[0];
-              setCurrentPlayerId(playerId);  // Update the central node to the clicked node
-            }
-          });
-        }
-
-      } catch (error) {
-        console.error('Error loading player data:', error);
-      }
+    } catch (error) {
+      console.error('Error expanding network:', error);
     }
-
-    loadPlayerData(currentPlayerId);
-  }, [currentPlayerId]);
+  };
 
   return (
     <div
