@@ -23,11 +23,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "./ui/use-toast"
-import { getAllPlayersWithNames, IDAndName } from "@/api"
+import { comparePlayers, getAllPlayersWithNames, ComparePlayerRequestPayload } from "@/api"
 import { Textarea } from "./ui/textarea"
 import { Switch } from "./ui/switch"
 import { Label } from "./ui/label"
-import { FormEventHandler } from "react"
+import { FormEventHandler, useEffect, useState } from "react"
 
 interface LabelValue {
     value: string;
@@ -46,17 +46,22 @@ const FormSchema = z.object({
     defensive: z.boolean(),
     strenghts: z.boolean(),
     weaknesses: z.boolean(),
-    other: z.boolean()
+    other: z.string(),
 })
 
 
 export default function ComparePlayers() {
-    const [openLeft, setOpenLeft] = React.useState(false)
-    const [open_right, setOpenRight] = React.useState(false)
-    const [valueLeft, setValueLeft] = React.useState("")
-    const [valueRight, setValueRight] = React.useState("")
-    const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = React.useState<LabelValue[]>([])
-    const [searchTerm, setSearchTerm] = React.useState('');
+    //general
+    const [isLoading, setIsLoading] = useState(false)
+
+    // Searchbox
+    const [items, setItems] = React.useState<LabelValue[]>([]);        // All items from the backend
+    const [filteredItemsLeft, setFilteredItemsLeft] = useState<LabelValue[]>([]);  // Filtered items to display
+    const [filteredItemsRight, setFilteredItemsRight] = useState<LabelValue[]>([]);  // Filtered items to display
+    const [searchTermLeft, setSearchTermLeft] = useState<string>('');  // Search term entered by user
+    const [searchTermRight, setSearchTermRight] = useState<string>('');  // Search term entered by user
+    const [isDropdownOpenLeft, setIsDropdownOpenLeft] = useState<boolean>(false);  // Dropdown visibility
+    const [isDropdownOpenRight, setIsDropdownOpenRight] = useState<boolean>(false);  // Dropdown visibility
 
     // switch states
     const [all, setAll] = React.useState(false)
@@ -66,6 +71,7 @@ export default function ComparePlayers() {
     const [weaknessesFilter, setWeaknessesFilter] = React.useState(false)
     const [otherFilter, setOtherFilter] = React.useState(false)
 
+
     const toggleAllOtherFields = (checked: boolean): void => {
         const newAllToggleState = !all
         setAll(newAllToggleState);
@@ -74,14 +80,13 @@ export default function ComparePlayers() {
         form.setValue("defensive", checked)
         form.setValue("strenghts", checked)
         form.setValue("weaknesses", checked)
-        form.setValue("other", checked)
     }
 
     const toggleOffensive = (): void => {
         setOffensiveFilter(!offensiveFilter);
     }
 
-    
+
     const toggleDefensive = (): void => {
         setDefensiveFilter(!defensiveFilter);
     }
@@ -90,17 +95,16 @@ export default function ComparePlayers() {
         setStrenghtsFilter(!strenghtsFilter);
     }
 
-    
+
     const toggleWeaknesses = (): void => {
         setWeaknessesFilter(!weaknessesFilter);
     }
 
-        
+
     const toggleOthers = (): void => {
         setOtherFilter(!otherFilter);
     }
 
-    //TODO on load of component, get all player ids from backend form rdbms
     React.useEffect(() => {
         const fetchPlayerIdWithNames = async () => {
             const response = await getAllPlayersWithNames()
@@ -112,95 +116,142 @@ export default function ComparePlayers() {
                 label: player.name,
             }));
 
-            setPlayerDataLabelAndValue(playerLabelValue);
-
+            setItems(playerLabelValue);
+            setFilteredItemsLeft(playerLabelValue);  // Initially, show all items
         }
         fetchPlayerIdWithNames()
     }, []) //need the empty array as second arguement, otherwise our backend endpoint will be called constantly
 
-    const filteredOptions = playerDataLabelAndValue.filter((player) =>
-        player.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // change list when typing differnt query
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            const lowerCasedSearchTerm = searchTermLeft.toLowerCase();
+            const filtered = items.filter((item) =>
+                item.label.toLowerCase().includes(lowerCasedSearchTerm)
+            );
+            setFilteredItemsLeft(filtered);
+        }, 300);  // we have a 300ms delay before the query-filter will apply
+
+        return () => clearTimeout(timeoutId); 
+    }, [searchTermLeft, items]);
+
+        // change list when typing differnt query
+        useEffect(() => {
+            const timeoutId = setTimeout(() => {
+                const lowerCasedSearchTerm = searchTermRight.toLowerCase();
+                const filtered = items.filter((item) =>
+                    item.label.toLowerCase().includes(lowerCasedSearchTerm)
+                );
+                setFilteredItemsRight(filtered);
+            }, 300);  // we have a 300ms delay before the query-filter will apply
+    
+            return () => clearTimeout(timeoutId); 
+        }, [searchTermRight, items]);
+
+    const handleInputChangeLeft = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTermLeft(e.target.value);
+        setIsDropdownOpenLeft(true); 
+    };
+
+    const handleInputChangeRight = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTermRight(e.target.value);
+        setIsDropdownOpenRight(true); 
+    };
+
+    const handleItemSelectLeft = (item: LabelValue) => {
+        console.log(item)
+        setSearchTermLeft(item.label); 
+        setIsDropdownOpenLeft(false);  
+    };
+
+    const handleItemSelectRight = (item: LabelValue) => {
+        console.log(item)
+        setSearchTermRight(item.label);
+        setIsDropdownOpenRight(false); 
+    };
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
+        defaultValues: {
+            all: false,
+            offensive: false,
+            defensive: false,
+            strenghts: false,
+            weaknesses: false,
+            other: "",
+          },
     })
 
-    function onSubmit(data: z.infer<typeof FormSchema>) {
-        toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
-        })
+    async function onSubmit(data: z.infer<typeof FormSchema>) {
+        setIsLoading(true)
+        const payload: ComparePlayerRequestPayload = {
+            player_left: Number(data.player_left), 
+            player_right: Number(data.player_right),
+            all: data.all,
+            offensive: data.offensive,
+            defensive: data.defensive,
+            strenghts: data.strenghts,
+            weaknesses: data.weaknesses,
+            other: data.other
+        };
+
+        let comparison = await comparePlayers(payload)
+        //TODO add state for the respone?
+        console.log("RESPONSE IN COMPONENET:")
+        // console.log(comparison)
+        setIsLoading(false)
     }
 
     return (
         <div className="w-full flex items-center justify-center ">
             <Form {...form}>
-
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex flex-col justify-center items-center">
                     <div className="flex flex-row space-x-4">
-
                         <FormField
                             control={form.control}
                             name="player_left"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Left Player</FormLabel>
-                                    <Popover open={openLeft} onOpenChange={setOpenLeft}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                aria-expanded={openLeft}
-                                                className="w-[200px] justify-between"
-                                            >
-                                                {valueLeft
-                                                    ? playerDataLabelAndValue.find((player) => player.value === valueLeft)?.label
-                                                    : "Select player..."}
-                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] p-0">
-                                            {/* TODO https://github.com/shadcn-ui/ui/discussions/3332 muss man hier selber was mit filter implementieren mit dynamischen daten*/}
-                                            {/* https://github.com/pacocoursey/cmdk */}
-                                            <Command shouldFilter={false}>
-                                                <CommandInput placeholder="Search player..." className="h-9" value={searchTerm} onValueChange={setSearchTerm} />
-                                                <CommandList>
-                                                    <CommandEmpty>No player found.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {filteredOptions.map((playerLeft) => (
-                                                            <CommandItem
-                                                                key={playerLeft.value}
-                                                                value={playerLeft.label}
-                                                                onSelect={(currentValue) => {
-                                                                    setValueLeft(currentValue === valueLeft ? "" : currentValue)
-                                                                    setOpenLeft(false)
-                                                                }}
-                                                            >
-                                                                {playerLeft.label}
-                                                                <CheckIcon
-                                                                    className={cn(
-                                                                        "ml-auto h-4 w-4",
-                                                                        valueLeft === playerLeft.label ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
+                                    <div className="relative w-64">
+                                        <input
+                                            type="text"
+                                            className="w-full border border-gray-300 rounded-lg p-2"
+                                            placeholder="Search..."
+                                            value={searchTermLeft}
+                                            onChange={(e) => {
+                                                handleInputChangeLeft(e); // Update the local search term
+                                                field.onChange(e.target.value); // Bind value to form field
+                                            }}
+                                            onFocus={() => setIsDropdownOpenLeft(true)}
+                                        />
+
+                                        {isDropdownOpenLeft && (
+                                            <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredItemsLeft.length > 0 ? (
+                                                    filteredItemsLeft.map((item) => (
+                                                        <div
+                                                            key={item.value}
+                                                            className="cursor-pointer p-2 hover:bg-gray-100"
+                                                            onClick={() => {
+                                                                handleItemSelectLeft(item);
+                                                                field.onChange(item.value); // Set selected player value to the form field
+                                                                setIsDropdownOpenLeft(false); // Close dropdown
+                                                            }}
+                                                        >
+                                                            {item.label}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-2 text-gray-500">No player found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                     <FormDescription>
                                         The first player we will use for the comparison
                                     </FormDescription>
-                                    <FormMessage />
                                 </FormItem>
-
                             )}
                         />
 
@@ -267,7 +318,7 @@ export default function ComparePlayers() {
                                         </div>
                                     )}
                                 />
-                              <FormField control={form.control}
+                                <FormField control={form.control}
                                     name="other"
                                     render={({ field }) => (
                                         <div className="flex items-center space-x-2">
@@ -288,53 +339,45 @@ export default function ComparePlayers() {
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Right Player</FormLabel>
-                                    <Popover open={open_right} onOpenChange={setOpenRight}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                aria-expanded={open_right}
-                                                className="w-[200px] justify-between"
-                                            >
-                                                {valueRight
-                                                    ? playerDataLabelAndValue.find((framework) => framework.value === valueRight)?.label
-                                                    : "Select second player..."}
-                                                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] p-0">
-                                            <Command >
-                                                <CommandInput placeholder="Search player..." className="h-9" />
-                                                <CommandList>
-                                                    <CommandEmpty>No player found.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {playerDataLabelAndValue.map((framework) => (
-                                                            <CommandItem
-                                                                key={framework.value}
-                                                                value={framework.value}
-                                                                onSelect={(currentValue) => {
-                                                                    setValueRight(currentValue === valueRight ? "" : currentValue)
-                                                                    setOpenRight(false)
-                                                                }}
-                                                            >
-                                                                {framework.label}
-                                                                <CheckIcon
-                                                                    className={cn(
-                                                                        "ml-auto h-4 w-4",
-                                                                        valueRight === framework.value ? "opacity-100" : "opacity-0"
-                                                                    )}
-                                                                />
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
                                     <FormDescription>
                                         The second player we will use for the comparison
                                     </FormDescription>
                                     <FormMessage />
+                                    <div className="relative w-64">
+                                        <input
+                                            type="text"
+                                            className="w-full border border-gray-300 rounded-lg p-2"
+                                            placeholder="Search..."
+                                            value={searchTermRight}
+                                            onChange={(e) => {
+                                                handleInputChangeRight(e); // Update the local search term
+                                                field.onChange(e.target.value); // Bind value to form field
+                                            }}
+                                            onFocus={() => setIsDropdownOpenRight(true)}
+                                        />
+
+                                        {isDropdownOpenRight && (
+                                            <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredItemsRight.length > 0 ? (
+                                                    filteredItemsRight.map((item) => (
+                                                        <div
+                                                            key={item.value}
+                                                            className="cursor-pointer p-2 hover:bg-gray-100"
+                                                            onClick={() => {
+                                                                handleItemSelectRight(item);
+                                                                field.onChange(item.value); 
+                                                                setIsDropdownOpenRight(false);
+                                                            }}
+                                                        >
+                                                            {item.label}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-2 text-gray-500">No player found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </FormItem>
                             )}
                         />

@@ -15,6 +15,23 @@ export type NameAndImage = {
   imageURL: string;
 };
 
+export type ComparePlayerRequestPayload = {
+  player_left: number
+  player_right: number
+  all: boolean
+  offensive: boolean
+  defensive: boolean
+  strenghts: boolean
+  weaknesses: boolean
+  other: string
+}
+
+export type ComparePlayerResponsePayload = {
+  player_left: number
+  player_right: number
+  comparison: string      
+}
+
 export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage> => {
   try {
     const response = await fetch(`https://www.transfermarkt.de/api/get/appShortinfo/player?ids=${playerID}`);
@@ -22,7 +39,7 @@ export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage>
 
     const data = await response.json();
     const playerData = data.player[0];
-
+                 
     return {
       name: playerData.name,
       imageURL: playerData.image,
@@ -75,13 +92,22 @@ export const getOriginaLReports = (playerID: number)=> {
   return response
 };
 
-
-
 export const getAllPlayersWithNames = () => {
   const path = 'players-with-name'
   const response = api.get<IDAndName[]>(path);
   return response
 };
+
+export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
+  console.log("PAYLOAD:")
+  console.log(payload)
+  const path = "compare-players"
+  const response = await api.post(path, { ...payload });
+  //TODO convert i guess
+  console.log("API RESPONSE:")
+  console.log(response)
+  return response.data.response
+}
 
 
 

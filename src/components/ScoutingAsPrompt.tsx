@@ -156,7 +156,7 @@ export default function Chat() {
                 <FormItem>
                   <FormLabel className="text-2xl">Scouting Prompt</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Player search prompt..." {...field} />
+                    <Textarea className="h-64" placeholder="Player search prompt..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
