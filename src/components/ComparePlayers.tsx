@@ -46,7 +46,8 @@ const FormSchema = z.object({
     defensive: z.boolean(),
     strenghts: z.boolean(),
     weaknesses: z.boolean(),
-    other: z.string(),
+    other: z.boolean(),
+    otherText: z.string(),
 })
 
 
@@ -80,6 +81,7 @@ export default function ComparePlayers() {
         form.setValue("defensive", checked)
         form.setValue("strenghts", checked)
         form.setValue("weaknesses", checked)
+        form.setValue("other", checked)
     }
 
     const toggleOffensive = (): void => {
@@ -132,42 +134,42 @@ export default function ComparePlayers() {
             setFilteredItemsLeft(filtered);
         }, 300);  // we have a 300ms delay before the query-filter will apply
 
-        return () => clearTimeout(timeoutId); 
+        return () => clearTimeout(timeoutId);
     }, [searchTermLeft, items]);
 
-        // change list when typing differnt query
-        useEffect(() => {
-            const timeoutId = setTimeout(() => {
-                const lowerCasedSearchTerm = searchTermRight.toLowerCase();
-                const filtered = items.filter((item) =>
-                    item.label.toLowerCase().includes(lowerCasedSearchTerm)
-                );
-                setFilteredItemsRight(filtered);
-            }, 300);  // we have a 300ms delay before the query-filter will apply
-    
-            return () => clearTimeout(timeoutId); 
-        }, [searchTermRight, items]);
+    // change list when typing differnt query
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            const lowerCasedSearchTerm = searchTermRight.toLowerCase();
+            const filtered = items.filter((item) =>
+                item.label.toLowerCase().includes(lowerCasedSearchTerm)
+            );
+            setFilteredItemsRight(filtered);
+        }, 300);  // we have a 300ms delay before the query-filter will apply
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTermRight, items]);
 
     const handleInputChangeLeft = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTermLeft(e.target.value);
-        setIsDropdownOpenLeft(true); 
+        setIsDropdownOpenLeft(true);
     };
 
     const handleInputChangeRight = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTermRight(e.target.value);
-        setIsDropdownOpenRight(true); 
+        setIsDropdownOpenRight(true);
     };
 
     const handleItemSelectLeft = (item: LabelValue) => {
         console.log(item)
-        setSearchTermLeft(item.label); 
-        setIsDropdownOpenLeft(false);  
+        setSearchTermLeft(item.label);
+        setIsDropdownOpenLeft(false);
     };
 
     const handleItemSelectRight = (item: LabelValue) => {
         console.log(item)
         setSearchTermRight(item.label);
-        setIsDropdownOpenRight(false); 
+        setIsDropdownOpenRight(false);
     };
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -178,21 +180,23 @@ export default function ComparePlayers() {
             defensive: false,
             strenghts: false,
             weaknesses: false,
-            other: "",
-          },
+            other: false,
+            otherText: "",
+        },
     })
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         setIsLoading(true)
         const payload: ComparePlayerRequestPayload = {
-            player_left: Number(data.player_left), 
+            player_left: Number(data.player_left),
             player_right: Number(data.player_right),
             all: data.all,
             offensive: data.offensive,
             defensive: data.defensive,
             strenghts: data.strenghts,
             weaknesses: data.weaknesses,
-            other: data.other
+            other: data.other,
+            otherText: data.otherText
         };
 
         let comparison = await comparePlayers(payload)
@@ -331,7 +335,19 @@ export default function ComparePlayers() {
                                     )}
                                 />
                             </div>
-                            <Textarea className="" placeholder="Define custom comparison filters (eg. leadership skills, attitude, ...) separated by ';'" />
+                            <FormField
+                                control={form.control}
+                                name="otherText"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="">Other attributions</FormLabel>
+                                        <FormControl>
+                                            <Textarea className="h-64" placeholder="Player search prompt..." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
                         <FormField
                             control={form.control}
@@ -365,7 +381,7 @@ export default function ComparePlayers() {
                                                             className="cursor-pointer p-2 hover:bg-gray-100"
                                                             onClick={() => {
                                                                 handleItemSelectRight(item);
-                                                                field.onChange(item.value); 
+                                                                field.onChange(item.value);
                                                                 setIsDropdownOpenRight(false);
                                                             }}
                                                         >

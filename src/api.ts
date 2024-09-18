@@ -23,7 +23,8 @@ export type ComparePlayerRequestPayload = {
   defensive: boolean
   strenghts: boolean
   weaknesses: boolean
-  other: string
+  other: boolean
+  otherText: string
 }
 
 export type ComparePlayerResponsePayload = {
