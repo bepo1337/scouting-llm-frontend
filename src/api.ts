@@ -29,7 +29,9 @@ export type ComparePlayerRequestPayload = {
 
 export type ComparePlayerResponsePayload = {
   player_left: number
+  player_left_name: string
   player_right: number
+  player_right_name: string
   comparison: string      
 }
 
@@ -100,14 +102,17 @@ export const getAllPlayersWithNames = () => {
 };
 
 export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
-  console.log("PAYLOAD:")
-  console.log(payload)
   const path = "compare-players"
   const response = await api.post(path, { ...payload });
-  //TODO convert i guess
-  console.log("API RESPONSE:")
-  console.log(response)
-  return response.data.response
+  const payloadObject: ComparePlayerResponsePayload = {
+    player_left: response.data.player_left,
+    player_left_name: response.data.player_left_name,
+    player_right: response.data.player_right,
+    player_right_name: response.data.player_right_name,
+    comparison: response.data.comparison
+  }
+
+  return payloadObject
 }
 
 
