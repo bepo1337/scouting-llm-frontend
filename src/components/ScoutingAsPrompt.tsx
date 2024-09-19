@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import PlayerList, { Player } from "./PlayerList"
-import Skeleton from "./Skeleton"
+import SkeletonsPlayerList from "./SkeletonPlayerList"
 import { Button } from "./ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
@@ -167,7 +167,7 @@ export default function Chat() {
             {!isLoading && <Button className="w-min" type="submit" >Scout</Button>}
             {isLoading &&
               <>
-                <Skeleton></Skeleton>
+                <SkeletonsPlayerList></SkeletonsPlayerList>
                 <Button  className="w-min" type="button" disabled>
                   <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

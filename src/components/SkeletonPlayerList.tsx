@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Skeleton() {
+export default function SkeletonsPlayerList() {
     return (
         <div className='space-y-4'>
             <div className="border  shadow rounded-md p-4 max-w-sm w-full">

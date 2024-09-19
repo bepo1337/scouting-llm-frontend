@@ -1,5 +1,5 @@
 import { fetchNameAndImage } from '@/api'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 type ProfileProps = {
     id: number | any

@@ -29,6 +29,8 @@ import { Switch } from "./ui/switch"
 import { Label } from "./ui/label"
 import { FormEventHandler, useEffect, useState } from "react"
 import PlayerCompareProfile from "./PlayerCompareProfile"
+import SkeletonsPlayerList from "./SkeletonPlayerList"
+import { Skeleton } from "./ui/skeleton"
 
 interface LabelValue {
     value: string;
@@ -55,6 +57,7 @@ const FormSchema = z.object({
 export default function ComparePlayers() {
     //general
     const [isLoading, setIsLoading] = useState(false)
+    const [showForm, setShowForm] = useState(true)
     const [showResult, setShowResult] = useState(false)
     const [comparisonResponse, setComparisonResponse] = useState<ComparePlayerResponsePayload>()
 
@@ -188,6 +191,7 @@ export default function ComparePlayers() {
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         setIsLoading(true)
+        setShowForm(false)
         const payload: ComparePlayerRequestPayload = {
             player_left: Number(data.player_left),
             player_right: Number(data.player_right),
@@ -208,7 +212,7 @@ export default function ComparePlayers() {
 
     function formatStructuredSummary(summary: string): string {
         let newSummary = summary.replace(/:\*\*/g, ':').replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
-    
+
         console.log(newSummary)
         return newSummary
     }
@@ -266,105 +270,104 @@ export default function ComparePlayers() {
                                     </FormItem>
                                 )}
                             />
-                            <div className="space-y-4 border-r-2 border-l-2 pl-8 pr-8">
-                                <h1 className="text-xl font-bold">Filters for comparison</h1>
-                                <div className="space-y-4">
-                                    <FormField control={form.control}
-                                        name="all"
+                            {showForm &&
+                                <div className="space-y-4 border-r-2 border-l-2 pl-8 pr-8">
+                                    <h1 className="text-xl font-bold">Filters for comparison</h1>
+                                    <div className="space-y-4">
+                                        <FormField control={form.control}
+                                            name="all"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleAllOtherFields(checked)
+                                                    }} id="all" />
+                                                    <Label htmlFor="all">All (complete comparison)</Label>
+                                                </div>
+                                            )}
+                                        />
+                                        <FormField control={form.control}
+                                            name="offensive"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleOffensive()
+                                                    }} id="offensive" />
+                                                    <Label htmlFor="offensive">Offensive Capabilities</Label>
+                                                </div>
+                                            )}
+                                        />
+                                        <FormField control={form.control}
+                                            name="defensive"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleDefensive()
+                                                    }} id="defensive" />
+                                                    <Label htmlFor="defensive">Defensive Capabilities</Label>
+                                                </div>
+                                            )}
+                                        />
+                                        <FormField control={form.control}
+                                            name="strenghts"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleStrengths()
+                                                    }} id="strenghts" />
+                                                    <Label htmlFor="strenghts">Strenghts</Label>
+                                                </div>
+                                            )}
+                                        />
+                                        <FormField control={form.control}
+                                            name="weaknesses"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleWeaknesses()
+                                                    }} id="weaknesses" />
+                                                    <Label htmlFor="weaknesses">Weaknesses</Label>
+                                                </div>
+                                            )}
+                                        />
+                                        <FormField control={form.control}
+                                            name="other"
+                                            render={({ field }) => (
+                                                <div className="flex items-center space-x-2">
+                                                    <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
+                                                        field.onChange(checked);
+                                                        toggleOthers()
+                                                    }} id="other" />
+                                                    <Label htmlFor="other">Other Attributions</Label>
+                                                </div>
+                                            )}
+                                        />
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="otherText"
                                         render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleAllOtherFields(checked)
-                                                }} id="all" />
-                                                <Label htmlFor="all">All (complete comparison)</Label>
-                                            </div>
-                                        )}
-                                    />
-                                    <FormField control={form.control}
-                                        name="offensive"
-                                        render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleOffensive()
-                                                }} id="offensive" />
-                                                <Label htmlFor="offensive">Offensive Capabilities</Label>
-                                            </div>
-                                        )}
-                                    />
-                                    <FormField control={form.control}
-                                        name="defensive"
-                                        render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleDefensive()
-                                                }} id="defensive" />
-                                                <Label htmlFor="defensive">Defensive Capabilities</Label>
-                                            </div>
-                                        )}
-                                    />
-                                    <FormField control={form.control}
-                                        name="strenghts"
-                                        render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleStrengths()
-                                                }} id="strenghts" />
-                                                <Label htmlFor="strenghts">Strenghts</Label>
-                                            </div>
-                                        )}
-                                    />
-                                    <FormField control={form.control}
-                                        name="weaknesses"
-                                        render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleWeaknesses()
-                                                }} id="weaknesses" />
-                                                <Label htmlFor="weaknesses">Weaknesses</Label>
-                                            </div>
-                                        )}
-                                    />
-                                    <FormField control={form.control}
-                                        name="other"
-                                        render={({ field }) => (
-                                            <div className="flex items-center space-x-2">
-                                                <Switch checked={field.value} onCheckedChange={(checked: boolean) => {
-                                                    field.onChange(checked);
-                                                    toggleOthers()
-                                                }} id="other" />
-                                                <Label htmlFor="other">Other Attributions</Label>
-                                            </div>
+                                            <FormItem>
+                                                <FormLabel className="">Other attributions</FormLabel>
+                                                <FormControl>
+                                                    <Textarea className="h-64" placeholder="Player search prompt..." {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
                                         )}
                                     />
                                 </div>
-                                <FormField
-                                    control={form.control}
-                                    name="otherText"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="">Other attributions</FormLabel>
-                                            <FormControl>
-                                                <Textarea className="h-64" placeholder="Player search prompt..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            }
                             <FormField
                                 control={form.control}
                                 name="player_right"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
                                         <FormLabel>Right Player</FormLabel>
-                                        <FormDescription>
-                                            The second player we will use for the comparison
-                                        </FormDescription>
                                         <FormMessage />
                                         <div className="relative w-64">
                                             <input
@@ -401,6 +404,9 @@ export default function ComparePlayers() {
                                                 </div>
                                             )}
                                         </div>
+                                        <FormDescription>
+                                            The second player we will use for the comparison
+                                        </FormDescription>
                                     </FormItem>
                                 )}
                             />
@@ -408,7 +414,13 @@ export default function ComparePlayers() {
                         {!isLoading && <Button className="w-min" type="submit" >Compare</Button>}
                         {isLoading &&
                             <>
-                                <p>TODO SKeleton</p>
+                                <div className="flex flex-col space-y-3">
+                                    <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-4 w-[250px]" />
+                                        <Skeleton className="h-4 w-[200px]" />
+                                    </div>
+                                </div>
                                 <Button className="w-min" type="button" disabled>
                                     <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
