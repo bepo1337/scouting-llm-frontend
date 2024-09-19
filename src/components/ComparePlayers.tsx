@@ -206,6 +206,13 @@ export default function ComparePlayers() {
         setShowResult(true)
     }
 
+    function formatStructuredSummary(summary: string): string {
+        let newSummary = summary.replace(/:\*\*/g, ':').replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
+    
+        console.log(newSummary)
+        return newSummary
+    }
+
     return (
         <div>
             {!showResult && <div className="w-full flex items-center justify-center ">
@@ -270,7 +277,7 @@ export default function ComparePlayers() {
                                                     field.onChange(checked);
                                                     toggleAllOtherFields(checked)
                                                 }} id="all" />
-                                                <Label htmlFor="all">All (complete/general comparison)</Label>
+                                                <Label htmlFor="all">All (complete comparison)</Label>
                                             </div>
                                         )}
                                     />
@@ -414,15 +421,15 @@ export default function ComparePlayers() {
                     </form>
                 </Form>
             </div>}
-            {showResult && <div className="flex flex-wrap">
-                <div className="w-1/3 p-2 text-center">
+            {showResult && <div className="flex flex-nowrap">
+                <div className="w-1/3 min-w-52 p-2 text-center">
                     <PlayerCompareProfile id={comparisonResponse?.player_left} name={comparisonResponse?.player_left_name}></PlayerCompareProfile>
                 </div>
 
                 <div className="w-1/3 p-2 text-center">
-                    Comparing different stuff
+                    {comparisonResponse?.comparison}
                 </div>
-                <div className="w-1/3 p-2 text-center">
+                <div className="w-1/3 min-w-52 p-2 text-center">
                     <PlayerCompareProfile id={comparisonResponse?.player_right} name={comparisonResponse?.player_right_name}></PlayerCompareProfile>
                 </div>
             </div>}
