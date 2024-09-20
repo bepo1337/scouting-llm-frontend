@@ -1,7 +1,7 @@
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { getOriginaLReports, sendReaction } from '@/api';
+import { sendReaction } from '@/api';
 
 export type Player = {
     id: number;

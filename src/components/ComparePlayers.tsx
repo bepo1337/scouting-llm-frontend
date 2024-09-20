@@ -1,36 +1,20 @@
 "use client"
 
 import * as React from "react"
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
 
-import { cn } from "@/lib/utils"
+import { ComparePlayerRequestPayload, ComparePlayerResponsePayload, comparePlayers, getAllPlayersWithNames } from "@/api"
 import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import { z } from "zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "./ui/use-toast"
-import { comparePlayers, getAllPlayersWithNames, ComparePlayerRequestPayload, ComparePlayerResponsePayload } from "@/api"
-import { Textarea } from "./ui/textarea"
-import { Switch } from "./ui/switch"
-import { Label } from "./ui/label"
-import { FormEventHandler, useEffect, useState } from "react"
+import { z } from "zod"
 import PlayerCompareProfile from "./PlayerCompareProfile"
-import SkeletonsPlayerList from "./SkeletonPlayerList"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
+import { Label } from "./ui/label"
 import { Skeleton } from "./ui/skeleton"
+import { Switch } from "./ui/switch"
+import { Textarea } from "./ui/textarea"
+import ComparePlayersTextArea from "./ComparePlayersTextArea"
 
 interface LabelValue {
     value: string;
@@ -77,6 +61,8 @@ export default function ComparePlayers() {
     const [strenghtsFilter, setStrenghtsFilter] = React.useState(false)
     const [weaknessesFilter, setWeaknessesFilter] = React.useState(false)
     const [otherFilter, setOtherFilter] = React.useState(false)
+
+
 
 
     const toggleAllOtherFields = (checked: boolean): void => {
@@ -205,16 +191,10 @@ export default function ComparePlayers() {
         };
 
         let comparison = await comparePlayers(payload)
+
         setComparisonResponse(comparison)
         setIsLoading(false)
         setShowResult(true)
-    }
-
-    function formatStructuredSummary(summary: string): string {
-        let newSummary = summary.replace(/:\*\*/g, ':').replace(/\*\*/g, "<br><br>").replace("<br><br>", "");
-
-        console.log(newSummary)
-        return newSummary
     }
 
     return (
@@ -439,7 +419,7 @@ export default function ComparePlayers() {
                 </div>
 
                 <div className="w-1/3 p-2 text-center">
-                    {comparisonResponse?.comparison}
+                    <ComparePlayersTextArea text={comparisonResponse?.comparison}></ComparePlayersTextArea>
                 </div>
                 <div className="w-1/3 min-w-52 p-2 text-center">
                     <PlayerCompareProfile id={comparisonResponse?.player_right} name={comparisonResponse?.player_right_name}></PlayerCompareProfile>

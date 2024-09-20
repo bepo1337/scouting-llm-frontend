@@ -28,7 +28,6 @@ const formSchema = z.object({
 export default function Chat() {
   const [playerList, setPlayerList] = useState<Player[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedPlayerID, setSelectedPlayerID] = useState<number>(0) //TODO kann eigentlich raus? wird ja nicht verwendet
   const [originalReports, setOriginalReports] = useState<string[]>([])
   const [fineGrainedReportState, setFineGrainedReportState] = useState<string>("")
   // hier muss eine andere DS her, key --> {[]string und highlightedreport}
@@ -87,12 +86,10 @@ export default function Chat() {
   const setPlayerAndReports = (playerID: number) => {
     console.log(playerID)
     if (playerID == 0) {
-      setSelectedPlayerID(0)
       setOriginalReports([])
       setFineGrainedReportState("")
 
     } else {
-      setSelectedPlayerID(playerID)
       setOriginalReports(playerToReports[playerID].reports)
       setFineGrainedReportState(playerToReports[playerID].fineGrainedReport)
     }

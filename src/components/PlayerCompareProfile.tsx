@@ -21,34 +21,7 @@ function getRandomBirthday(): string {
     return `${day}.${month}.${year}`;
   }
 
-  function getRandomCountry(): string {
-    const countries = [
-      "United States",
-      "Canada",
-      "Brazil",
-      "Germany",
-      "France",
-      "Italy",
-      "United Kingdom",
-      "Australia",
-      "Japan",
-      "China",
-      "India",
-      "Mexico",
-      "Russia",
-      "South Africa",
-      "Argentina",
-      "Nigeria",
-      "Egypt",
-      "Turkey",
-      "Spain",
-      "Sweden",
-    ];
   
-    const randomIndex = Math.floor(Math.random() * countries.length);
-  
-    return countries[randomIndex];
-  }
 
   function getRandomSoccerClub(): string {
     const clubs = [

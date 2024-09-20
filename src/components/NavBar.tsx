@@ -1,7 +1,6 @@
 
 import { Link } from '@radix-ui/react-navigation-menu'
-import { Link as ReactRouterLink } from 'react-router-dom'
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from './ui/navigation-menu'
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from './ui/navigation-menu'
 
 export default function NavBar() {
     return (
