@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 
 type props = {
@@ -19,7 +18,7 @@ export default function ComparePlayersTextArea({ text }: props) {
             {Object.entries(jsonData).map(([key, value]) => (
                 <Card key={key} className="p-2 shadow-lg border rounded-lg">
                     <CardHeader>
-                        <CardTitle className="text-lg font-semibold">{key}</CardTitle>
+                        <CardTitle className="text-lg font-semibold">{key[0].toUpperCase() + key.substr(1).toLowerCase()}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-sm">
