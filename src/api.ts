@@ -101,6 +101,12 @@ export const getAllPlayersWithNames = () => {
   return response
 };
 
+export async function fetchSimilarPlayers(playerID: number) {
+  const path = 'similar_players/' + playerID
+  const response = await api.get(path);
+  return response.data;
+};
+
 export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
   const path = "compare-players"
   const response = await api.post(path, { ...payload });
@@ -114,7 +120,6 @@ export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
 
   return payloadObject
 }
-
 
 
 
