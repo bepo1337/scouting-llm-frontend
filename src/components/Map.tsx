@@ -1,10 +1,9 @@
 import React from "react";
 import {
+  Annotation,
   ComposableMap,
   Geographies,
-  Geography,
-  Annotation,
-  ZoomableGroup
+  Geography
 } from "react-simple-maps";
 
 const MapChart: React.FC = () => {

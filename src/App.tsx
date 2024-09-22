@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import ScoutingAsPrompt from './components/ScoutingAsPrompt';
 import Chat from './components/Chat';
-import SouthAmericaMap from './components/Map';
 import Graph from './components/Graph';
 import ComparePlayers from './components/ComparePlayers';
+import FilterableCombobox from './components/TestCombobox';
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
             <Route path="/" element={<ScoutingAsPrompt ></ScoutingAsPrompt>} />
             <Route path="/compare" element={<ComparePlayers ></ComparePlayers>} />
             <Route path="/chat" element={<Chat></Chat>} />
-            <Route path="/map" element={<SouthAmericaMap></SouthAmericaMap>} />
+            <Route path="/test" element={<FilterableCombobox></FilterableCombobox>} />
             <Route path="/graph" element={<Graph></Graph>} />
           </Routes>
         </div>

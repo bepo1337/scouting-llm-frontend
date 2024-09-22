@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from 'react'
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { Button } from './ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form"
 import { Textarea } from './ui/textarea'
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form"
 
 export default function Chat() {
     const dummyAnswers = ["Luka Jović and Hugo Ekitike are both center-forwards known for their finishing and positioning. Jović, more experienced, excels in link-up play and is a traditional number 9, while Ekitike, younger and with higher potential, offers versatility with his dribbling and ability to play wider roles. Jović's strengths lie in his reliability and experience, whereas Ekitike's appeal is his dynamic play and significant growth potential.",
@@ -36,7 +36,7 @@ export default function Chat() {
     return (
         <div className='flex flex-col gap-y-4'>
             <div className='flex flex-col gap-y-2'>
-                {myPrompts.map((item, index) => (
+                {myPrompts.map((_, index) => (
                     <div className='flex flex-col gap-y-2' key={index}>
                         <Card className='flex justify-end'>
                             <CardHeader>

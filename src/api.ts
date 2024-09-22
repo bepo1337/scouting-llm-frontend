@@ -15,6 +15,26 @@ export type NameAndImage = {
   imageURL: string;
 };
 
+export type ComparePlayerRequestPayload = {
+  player_left: number
+  player_right: number
+  all: boolean
+  offensive: boolean
+  defensive: boolean
+  strenghts: boolean
+  weaknesses: boolean
+  other: boolean
+  otherText: string
+}
+
+export type ComparePlayerResponsePayload = {
+  player_left: number
+  player_left_name: string
+  player_right: number
+  player_right_name: string
+  comparison: string      
+}
+
 export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage> => {
   try {
     const response = await fetch(`https://www.transfermarkt.de/api/get/appShortinfo/player?ids=${playerID}`);
@@ -22,7 +42,7 @@ export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage>
 
     const data = await response.json();
     const playerData = data.player[0];
-
+                 
     return {
       name: playerData.name,
       imageURL: playerData.image,
@@ -34,7 +54,9 @@ export const fetchNameAndImage = async (playerID: number): Promise<NameAndImage>
 };
 
 export type PlayerAPIResponse = {
+  // hier list emit finegrained reports 
   player_id: number;
+  fine_grained_reports: string[];
   report_summary: string;
 };
 
@@ -48,6 +70,7 @@ export const convertToPlayerList = async (data: PlayerAPIResponse[]) => {
         img: imageURL,
         tmLink: `https://www.transfermarkt.de/spieler/profil/spieler/${element.player_id}`,
         summary: element.report_summary,
+        fineGrainedReports: element.fine_grained_reports,
         name,
       };
     })
@@ -72,8 +95,6 @@ export const getOriginaLReports = (playerID: number)=> {
   return response
 };
 
-
-
 export const getAllPlayersWithNames = () => {
   const path = 'players-with-name'
   const response = api.get<IDAndName[]>(path);
@@ -84,7 +105,21 @@ export async function fetchSimilarPlayers(playerID: number) {
   const path = 'similar_players/' + playerID
   const response = await api.get(path);
   return response.data;
-} 
+};
+
+export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
+  const path = "compare-players"
+  const response = await api.post(path, { ...payload });
+  const payloadObject: ComparePlayerResponsePayload = {
+    player_left: response.data.player_left,
+    player_left_name: response.data.player_left_name,
+    player_right: response.data.player_right,
+    player_right_name: response.data.player_right_name,
+    comparison: response.data.comparison
+  }
+
+  return payloadObject
+}
 
 
 
