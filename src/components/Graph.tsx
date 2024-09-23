@@ -1,13 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import Select from "react-select";
 import { fetchSimilarPlayers, fetchNameAndImage } from "../api";
 import { Network, DataSet, Options } from "vis-network/standalone";
 import "vis-network/styles/vis-network.css";
 import { Button } from "@/components/ui/button";
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { getAllPlayersWithNames } from "@/api";
+import ClipLoader from "react-spinners/ClipLoader";
 
 interface PlayerNode {
   id: string;
@@ -30,9 +28,9 @@ interface LabelValue {
 
 const PlayerNetwork: React.FC = () => {
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = useState<LabelValue[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<LabelValue | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for both data load and network expansion
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -82,14 +80,12 @@ const PlayerNetwork: React.FC = () => {
     },
   };
 
-  // Fetch players on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchPlayerIdWithNames = async () => {
       const response = await getAllPlayersWithNames();
       const playersList = response.data;
-      const shortPlayers = playersList.slice(0, 100);
 
-      const playerLabelValue = shortPlayers.map((player: { id: number; name: string }) => ({
+      const playerLabelValue = playersList.map((player: { id: number; name: string }) => ({
         value: player.id.toString(),
         label: player.name,
       }));
@@ -101,9 +97,10 @@ const PlayerNetwork: React.FC = () => {
   }, []);
 
   const loadPlayerData = async (playerId: string) => {
+    setIsLoading(true); // Start loading
     try {
-      nodesRef.current.clear(); // Clear previous nodes
-      edgesRef.current.clear(); // Clear previous edges
+      nodesRef.current.clear();
+      edgesRef.current.clear();
 
       const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
@@ -118,7 +115,7 @@ const PlayerNetwork: React.FC = () => {
         label: playerInfo.name,
         image: playerInfo.imageURL,
         group: "central",
-        title: "Above average height, agile and fast. The player has a good level of speed endurance, he is able to maintain a pace throughout the game. Level of technical skills is acceptable, nothing special.  When he receives the ball on the side of the pitch, he is able, through link-up play or individually, to get in behind the opposing team defense into spaces where he can make a cross.",
+        title: "Above average height, agile and fast. The player has a good level of speed endurance, he is able to maintain a pace throughout the game. Level of technical skills is acceptable, nothing special. When he receives the ball on the side of the pitch, he is able, through link-up play or individually, to get in behind the opposing team defense into spaces where he can make a cross.",
       };
 
       nodesRef.current.add(centralNode);
@@ -160,10 +157,13 @@ const PlayerNetwork: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading player data:", error);
+    } finally {
+      setIsLoading(false); // End loading
     }
   };
 
   const expandNetwork = async (playerId: string) => {
+    setIsLoading(true); // Start loading for network expansion
     try {
       const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
@@ -197,7 +197,7 @@ const PlayerNetwork: React.FC = () => {
         const existingEdge = edgesRef.current.get({
           filter: (item: { from: any; to: any }) => item.from === edge.from && item.to === edge.to,
         });
-        return existingEdge.length === 0; // Only add if no matching edge exists
+        return existingEdge.length === 0;
       });
 
       edgesRef.current.add(filteredEdges);
@@ -205,44 +205,25 @@ const PlayerNetwork: React.FC = () => {
       networkRef.current?.setData({ nodes: nodesRef.current, edges: edgesRef.current });
     } catch (error) {
       console.error("Error expanding network:", error);
+    } finally {
+      setIsLoading(false); // End loading
     }
   };
 
   return (
     <div>
-      <div style={{ padding: "10px" }}>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" role="combobox" aria-expanded={open} className="w-[200px] justify-between">
-              {value ? playerDataLabelAndValue.find((player) => player.value === value)?.label : "Select player..."}
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command shouldFilter>
-              <CommandInput placeholder="Search player..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No player found.</CommandEmpty>
-                <CommandGroup>
-                  {playerDataLabelAndValue.map((player) => (
-                    <CommandItem
-                      key={player.value}
-                      value={player.value}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue);
-                        setOpen(false);
-                        setPlayerId(currentValue);
-                      }}
-                    >
-                      {player.label}
-                      <CheckIcon className={cn("ml-auto h-4 w-4", value === player.value ? "opacity-100" : "opacity-0")} />
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+      <div style={{ padding: "10px", display: "flex", alignItems: "center" }}>
+        <Select
+          options={playerDataLabelAndValue}
+          value={selectedPlayer}
+          onChange={(selectedOption: React.SetStateAction<LabelValue | null>) => {
+            setSelectedPlayer(selectedOption);
+            setPlayerId(selectedOption?.value || null);
+          }}
+          placeholder="Select player..."
+          isClearable
+          className="w-[200px]"
+        />
         <Button
           className="ml-4"
           onClick={() => {
@@ -250,10 +231,16 @@ const PlayerNetwork: React.FC = () => {
               loadPlayerData(playerId);
             }
           }}
+          disabled={isLoading} // Disable the button when loading
         >
-          Load Network
+          {isLoading ? "Loading..." : "Load Network"}
         </Button>
       </div>
+      {isLoading && (
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: "10px" }}>
+          <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
+        </div>
+      )}
       <div ref={networkContainerRef} style={{ height: "600px" }} />
     </div>
   );
