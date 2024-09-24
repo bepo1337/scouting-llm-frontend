@@ -30,7 +30,7 @@ const PlayerNetwork: React.FC = () => {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = useState<LabelValue[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<LabelValue | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for both data load and network expansion
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -38,23 +38,25 @@ const PlayerNetwork: React.FC = () => {
   const edgesRef = useRef<DataSet<Edge>>(new DataSet());
 
   const options: Options = {
+    width: "100%",
+    height: "100%",
     nodes: {
-      borderWidth: 5,
-      size: 50,
+      borderWidth: 2,
+      size: 30,
       color: {
-        border: "#2B7CE9",
-        background: "#97C2FC",
+        border: "#000000",
+        background: "#000000",
         highlight: {
-          border: "#2B7CE9",
-          background: "#D2E5FF",
+          border: "#000000",
+          background: "#000000",
         },
         hover: {
-          border: "#2B7CE9",
-          background: "#D2E5FF",
+          border: "#000000",
+          background: "#000000",
         },
       },
       font: {
-        color: "black",
+        color: "#000000",
         size: 20,
         face: "arial",
         align: "center",
@@ -97,7 +99,7 @@ const PlayerNetwork: React.FC = () => {
   }, []);
 
   const loadPlayerData = async (playerId: string) => {
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
     try {
       nodesRef.current.clear();
       edgesRef.current.clear();
@@ -115,7 +117,7 @@ const PlayerNetwork: React.FC = () => {
         label: playerInfo.name,
         image: playerInfo.imageURL,
         group: "central",
-        title: "Above average height, agile and fast. The player has a good level of speed endurance, he is able to maintain a pace throughout the game. Level of technical skills is acceptable, nothing special. When he receives the ball on the side of the pitch, he is able, through link-up play or individually, to get in behind the opposing team defense into spaces where he can make a cross.",
+        title: playerInfo.description || "Player description",
       };
 
       nodesRef.current.add(centralNode);
@@ -145,6 +147,7 @@ const PlayerNetwork: React.FC = () => {
       if (!networkRef.current) {
         const network = new Network(networkContainerRef.current!, { nodes: nodesRef.current, edges: edgesRef.current }, options);
         networkRef.current = network;
+        networkRef.current.setOptions(options);
 
         network.on("click", function (params) {
           if (params.nodes.length > 0) {
@@ -154,16 +157,17 @@ const PlayerNetwork: React.FC = () => {
         });
       } else {
         networkRef.current.setData({ nodes: nodesRef.current, edges: edgesRef.current });
+        networkRef.current.setOptions(options);
       }
     } catch (error) {
       console.error("Error loading player data:", error);
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
   const expandNetwork = async (playerId: string) => {
-    setIsLoading(true); // Start loading for network expansion
+    setIsLoading(true);
     try {
       const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
@@ -203,16 +207,22 @@ const PlayerNetwork: React.FC = () => {
       edgesRef.current.add(filteredEdges);
 
       networkRef.current?.setData({ nodes: nodesRef.current, edges: edgesRef.current });
+      networkRef.current?.setOptions(options);
     } catch (error) {
       console.error("Error expanding network:", error);
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <div style={{ padding: "10px", display: "flex", alignItems: "center" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar */}
+      <div style={{ width: "250px", backgroundColor: "#f0f0f0", padding: "20px", boxSizing: "border-box", alignSelf: "flex-start" }}>
+        <div style={{ marginBottom: "20px" }}>
+          <h1>Player Network</h1>
+          <p>Explore players and their similar counterparts based on different attributes.</p>
+        </div>
         <Select
           options={playerDataLabelAndValue}
           value={selectedPlayer}
@@ -225,23 +235,25 @@ const PlayerNetwork: React.FC = () => {
           className="w-[200px]"
         />
         <Button
-          className="ml-4"
+          className="mt-4"
           onClick={() => {
             if (playerId) {
               loadPlayerData(playerId);
             }
           }}
-          disabled={isLoading} // Disable the button when loading
+          disabled={isLoading}
         >
           {isLoading ? "Loading..." : "Load Network"}
         </Button>
+        {isLoading && (
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: "10px" }}>
+            <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
+          </div>
+        )}
       </div>
-      {isLoading && (
-        <div style={{ display: "flex", justifyContent: "center", paddingTop: "10px" }}>
-          <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
-        </div>
-      )}
-      <div ref={networkContainerRef} style={{ height: "600px" }} />
+
+      {/* Network visualization */}
+      <div ref={networkContainerRef} style={{ flex: 1, height: "100vh", padding: "20px", boxSizing: "border-box" }} />
     </div>
   );
 };
