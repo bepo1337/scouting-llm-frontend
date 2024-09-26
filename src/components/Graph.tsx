@@ -12,7 +12,6 @@ interface PlayerNode {
   label: string;
   image: string;
   group: string;
-  title: string;
 }
 
 interface Edge {
@@ -117,7 +116,6 @@ const PlayerNetwork: React.FC = () => {
         label: playerInfo.name,
         image: playerInfo.imageURL,
         group: "central",
-        title: playerInfo.description || "Player description",
       };
 
       nodesRef.current.add(centralNode);
@@ -216,44 +214,60 @@ const PlayerNetwork: React.FC = () => {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar */}
-      <div style={{ width: "250px", backgroundColor: "#f0f0f0", padding: "20px", boxSizing: "border-box", alignSelf: "flex-start" }}>
-        <div style={{ marginBottom: "20px" }}>
-          <h1>Player Network</h1>
-          <p>Explore players and their similar counterparts based on different attributes.</p>
-        </div>
-        <Select
-          options={playerDataLabelAndValue}
-          value={selectedPlayer}
-          onChange={(selectedOption: React.SetStateAction<LabelValue | null>) => {
-            setSelectedPlayer(selectedOption);
-            setPlayerId(selectedOption?.value || null);
-          }}
-          placeholder="Select player..."
-          isClearable
-          className="w-[200px]"
-        />
-        <Button
-          className="mt-4"
-          onClick={() => {
-            if (playerId) {
-              loadPlayerData(playerId);
-            }
-          }}
-          disabled={isLoading}
-        >
-          {isLoading ? "Loading..." : "Load Network"}
-        </Button>
-        {isLoading && (
-          <div style={{ display: "flex", justifyContent: "center", paddingTop: "10px" }}>
-            <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
+    <div className="w-full flex justify-center">
+      {/* Main container with two sections */}
+      <div className="w-full flex justify-between p-8 items-start">  {/* Ensure top alignment with 'items-start' */}
+        
+        {/* Section 1: Left Sidebar */}
+        <div className="w-1/3 pr-8 flex flex-col space-y-4">  {/* Using 'space-y-4' for consistent spacing between items */}
+          <h2 className="text-2xl font-semibold">Select Player</h2>
+          <div>
+            {/* Replace Popover with react-select */}
+            <Select
+              options={playerDataLabelAndValue}
+              value={selectedPlayer}
+              onChange={(selectedOption) => {
+                setSelectedPlayer(selectedOption);
+                setPlayerId(selectedOption?.value || null);
+              }}
+              placeholder="Select player..."
+              isClearable
+              className="w-[200px]"
+            />
+            
+            {/* Load button with loading animation */}
+            <Button
+              className="mt-4"
+              onClick={() => {
+                if (playerId) {
+                  loadPlayerData(playerId);
+                }
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Load Network"}
+            </Button>
+            
+            {/* Loading animation */}
+            {isLoading && (
+              <div className="flex justify-center pt-4">
+                <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
+              </div>
+            )}
           </div>
-        )}
+        </div>
+  
+        {/* Section 2: Right Main Content Area */}
+        <div className="w-2/3 border-l-2 pl-8 flex flex-col space-y-4">  {/* Consistent padding and top alignment with 'space-y-4' */}
+          <h2 className="text-2xl font-semibold">Player Network</h2>
+          {/* Network visualization area */}
+          <div ref={networkContainerRef} style={{ height: "600px", border: "1px solid #ddd" }}>
+            {/* Placeholder for the network visualization */}
+            <p>Network will be displayed here once loaded.</p>
+          </div>
+        </div>
+        
       </div>
-
-      {/* Network visualization */}
-      <div ref={networkContainerRef} style={{ flex: 1, height: "100vh", padding: "20px", boxSizing: "border-box" }} />
     </div>
   );
 };
