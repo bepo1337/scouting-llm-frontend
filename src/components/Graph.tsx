@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Select from "react-select";
-import { fetchSimilarPlayers, fetchNameAndImage } from "../api";
+import { fetchSimilarPlayers, fetchNameAndImage, getPlayerSummary } from "../api"; // added getPlayerSummary import
 import { Network, DataSet, Options } from "vis-network/standalone";
 import "vis-network/styles/vis-network.css";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ const PlayerNetwork: React.FC = () => {
   const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = useState<LabelValue[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<LabelValue | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [playerSummary, setPlayerSummary] = useState<string | null>(null); // new state for player summary
+  const [playerName, setPlayerName] = useState<string | null>(null); // new state for player's name in the summary
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -147,10 +149,19 @@ const PlayerNetwork: React.FC = () => {
         networkRef.current = network;
         networkRef.current.setOptions(options);
 
+        // Single-click event to display player summary
         network.on("click", function (params) {
           if (params.nodes.length > 0) {
             const clickedPlayerId = params.nodes[0];
-            expandNetwork(clickedPlayerId);
+            handlePlayerClick(clickedPlayerId); // Show the summary on single click
+          }
+        });
+
+        // Double-click event to expand network
+        network.on("doubleClick", function (params) {
+          if (params.nodes.length > 0) {
+            const clickedPlayerId = params.nodes[0];
+            expandNetwork(clickedPlayerId); // Expand network on double click
           }
         });
       } else {
@@ -159,6 +170,21 @@ const PlayerNetwork: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading player data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePlayerClick = async (playerId: string) => {
+    setIsLoading(true);
+    try {
+      const summary = await getPlayerSummary(parseInt(playerId, 10));
+      const playerInfo = await fetchNameAndImage(parseInt(playerId, 10)); // Fetch the player's name for the summary
+
+      setPlayerSummary(summary);
+      setPlayerName(playerInfo.name); // Set the player name in state
+    } catch (error) {
+      console.error("Error fetching player summary:", error);
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +247,7 @@ const PlayerNetwork: React.FC = () => {
         {/* Section 1: Left Sidebar */}
         <div className="w-1/3 pr-8 flex flex-col space-y-4">  {/* Using 'space-y-4' for consistent spacing between items */}
           <h2 className="text-2xl font-semibold">Select Player</h2>
-          <div>
+          <div className="flex items-center space-x-4"> {/* Flex container for Select and Button */}
             {/* Replace Popover with react-select */}
             <Select
               options={playerDataLabelAndValue}
@@ -235,9 +261,8 @@ const PlayerNetwork: React.FC = () => {
               className="w-[200px]"
             />
             
-            {/* Load button with loading animation */}
+            {/* Load button to the right of the Select */}
             <Button
-              className="mt-4"
               onClick={() => {
                 if (playerId) {
                   loadPlayerData(playerId);
@@ -247,14 +272,24 @@ const PlayerNetwork: React.FC = () => {
             >
               {isLoading ? "Loading..." : "Load Network"}
             </Button>
-            
-            {/* Loading animation */}
-            {isLoading && (
-              <div className="flex justify-center pt-4">
-                <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
-              </div>
-            )}
           </div>
+          
+          {/* Loading animation */}
+          {isLoading && (
+            <div className="flex justify-center pt-4">
+              <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
+            </div>
+          )}
+
+          {/* Player Summary */}
+          {playerSummary && (
+            <div className="mt-4 p-4 border rounded shadow">
+              <h3 className="text-lg font-semibold">
+                Player Summary {playerName && `: ${playerName}`}
+              </h3>
+              <p>{playerSummary}</p>
+            </div>
+          )}
         </div>
   
         {/* Section 2: Right Main Content Area */}

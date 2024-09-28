@@ -121,5 +121,11 @@ export const comparePlayers = async (payload: ComparePlayerRequestPayload) => {
   return payloadObject
 }
 
+export const getPlayerSummary = async (playerID: number) => {
+  const path = 'summary/' + playerID
+  const response = await api.get(path);
+  return response.data;
+}
+
 
 
