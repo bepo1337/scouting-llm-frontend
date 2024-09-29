@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Select from "react-select";
-import { fetchSimilarPlayers, fetchNameAndImage, getPlayerSummary } from "../api"; // added getPlayerSummary import
+import { fetchSimilarPlayers, fetchNameAndImage, getPlayerSummary, comparePlayers} from "../api"; // added getPlayerSummary import
 import { Network, DataSet, Options } from "vis-network/standalone";
 import "vis-network/styles/vis-network.css";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ const PlayerNetwork: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [playerSummary, setPlayerSummary] = useState<string | null>(null); // new state for player summary
   const [playerName, setPlayerName] = useState<string | null>(null); // new state for player's name in the summary
+  const [comparisonResult, setComparisonResult] = useState<any | null>(null);
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -149,6 +150,13 @@ const PlayerNetwork: React.FC = () => {
         networkRef.current = network;
         networkRef.current.setOptions(options);
 
+        network.on("click", function (params) {
+          if (params.edges.length > 0) {
+            const clickedEdgeId = params.edges[0];
+            handleEdgeClick(clickedEdgeId); // Handle edge click for comparison
+          }
+        });
+        
         // Single-click event to display player summary
         network.on("click", function (params) {
           if (params.nodes.length > 0) {
@@ -185,6 +193,35 @@ const PlayerNetwork: React.FC = () => {
       setPlayerName(playerInfo.name); // Set the player name in state
     } catch (error) {
       console.error("Error fetching player summary:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to handle edge click and fetch comparison
+  const handleEdgeClick = async (edgeId: string) => {
+    const edge = edgesRef.current.get(edgeId);
+    if (!edge) return;
+
+    const { from, to } = edge; // Extract player IDs from edge
+    setIsLoading(true);
+    try {
+      const comparisonPayload = {
+        player_left: parseInt(from, 10),
+        player_right: parseInt(to, 10),
+        all: true, // You can adjust the criteria as needed
+        offensive: false,
+        defensive: false,
+        strenghts: false,
+        weaknesses: false,
+        other: false,
+        otherText: ""
+      };
+
+      const comparison = await comparePlayers(comparisonPayload);
+      setComparisonResult(comparison); // Store the comparison result
+    } catch (error) {
+      console.error("Error fetching comparison:", error);
     } finally {
       setIsLoading(false);
     }
@@ -242,13 +279,12 @@ const PlayerNetwork: React.FC = () => {
   return (
     <div className="w-full flex justify-center">
       {/* Main container with two sections */}
-      <div className="w-full flex justify-between p-8 items-start">  {/* Ensure top alignment with 'items-start' */}
+      <div className="w-full flex justify-between pt-0 p-8 items-start">
         
         {/* Section 1: Left Sidebar */}
-        <div className="w-1/3 pr-8 flex flex-col space-y-4">  {/* Using 'space-y-4' for consistent spacing between items */}
+        <div className="w-1/3 pr-8 flex flex-col space-y-4"> 
           <h2 className="text-2xl font-semibold">Select Player</h2>
-          <div className="flex items-center space-x-4"> {/* Flex container for Select and Button */}
-            {/* Replace Popover with react-select */}
+          <div className="flex items-center space-x-4">
             <Select
               options={playerDataLabelAndValue}
               value={selectedPlayer}
@@ -288,6 +324,13 @@ const PlayerNetwork: React.FC = () => {
                 Player Summary {playerName && `: ${playerName}`}
               </h3>
               <p>{playerSummary}</p>
+            </div>
+          )}
+
+          {comparisonResult && (
+            <div className="mt-4 p-4 border rounded shadow">
+              <h2 className="text-lg font-semibold">Player Comparison: {comparisonResult.player_left_name} vs {comparisonResult.player_right_name}</h2>
+                <p>{JSON.parse(comparisonResult.comparison).general}</p>
             </div>
           )}
         </div>
