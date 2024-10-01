@@ -33,6 +33,7 @@ const PlayerNetwork: React.FC = () => {
   const [playerSummary, setPlayerSummary] = useState<string | null>(null); // new state for player summary
   const [playerName, setPlayerName] = useState<string | null>(null); // new state for player's name in the summary
   const [comparisonResult, setComparisonResult] = useState<any | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -276,39 +277,60 @@ const PlayerNetwork: React.FC = () => {
     }
   };
 
+  const toggleHelp = () => setShowHelp(!showHelp);
+
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center relative">
+      {/* Help Icon in the top-right corner */}
+      <div
+        className="absolute top-0 right-8 bg-gray-300 rounded-full w-10 h-10 flex justify-center items-center cursor-pointer"
+        onClick={toggleHelp}
+      >
+        <span className="text-xl font-bold text-white">?</span>
+      </div>
+
+      {/* Help Popup */}
+      {showHelp && (
+        <div className="absolute top-14 right-10 bg-white border shadow-lg p-4 rounded-lg z-50">
+          <h3 className="text-lg font-semibold">How to Use the Player Network</h3>
+          <p>Select a player from the dropdown to load their network.</p>
+          <p>Click on players in the network to view their summary.</p>
+          <p>Double-click on a player to expand their network of similar players.</p>
+        </div>
+      )}
+      
       {/* Main container with two sections */}
       <div className="w-full flex justify-between pt-0 p-8 items-start">
         
         {/* Section 1: Left Sidebar */}
-        <div className="w-1/3 pr-8 flex flex-col space-y-4"> 
-          <h2 className="text-2xl font-semibold">Select Player</h2>
-          <div className="flex items-center space-x-4">
-            <Select
-              options={playerDataLabelAndValue}
-              value={selectedPlayer}
-              onChange={(selectedOption) => {
-                setSelectedPlayer(selectedOption);
-                setPlayerId(selectedOption?.value || null);
-              }}
-              placeholder="Select player..."
-              isClearable
-              className="w-[200px]"
-            />
-            
-            {/* Load button to the right of the Select */}
-            <Button
-              onClick={() => {
-                if (playerId) {
-                  loadPlayerData(playerId);
-                }
-              }}
-              disabled={isLoading}
-            >
-              {isLoading ? "Loading..." : "Load Network"}
-            </Button>
-          </div>
+        <div className="w-1/4 pr-8 flex flex-col space-y-4"> 
+        <h2 className="text-2xl font-semibold">Select Player</h2>
+        <div className="flex flex-col space-y-4 w-full">
+          <Select
+            options={playerDataLabelAndValue}
+            value={selectedPlayer}
+            onChange={(selectedOption) => {
+              setSelectedPlayer(selectedOption);
+              setPlayerId(selectedOption?.value || null);
+            }}
+            placeholder="Select player..."
+            isClearable
+            className="w-full"
+          />
+
+          {/* Load button full width */}
+          <Button
+            className="w-full"
+            onClick={() => {
+              if (playerId) {
+                loadPlayerData(playerId);
+              }
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : "Load Network"}
+          </Button>
+        </div>
           
           {/* Loading animation */}
           {isLoading && (
@@ -336,11 +358,20 @@ const PlayerNetwork: React.FC = () => {
         </div>
   
         {/* Section 2: Right Main Content Area */}
-        <div className="w-2/3 border-l-2 pl-8 flex flex-col space-y-4">  {/* Consistent padding and top alignment with 'space-y-4' */}
+        <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4">  {/* Consistent padding and top alignment with 'space-y-4' */}
           <h2 className="text-2xl font-semibold">Player Network</h2>
           {/* Network visualization area */}
-          <div ref={networkContainerRef} style={{ height: "600px", border: "1px solid #ddd" }}>
-            {/* Placeholder for the network visualization */}
+          <div
+            ref={networkContainerRef}
+            style={{
+              height: "650px",
+              border: "1px solid #ddd",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "grey",
+            }}
+          >
             <p>Network will be displayed here once loaded.</p>
           </div>
         </div>
