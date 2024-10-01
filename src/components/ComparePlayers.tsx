@@ -103,9 +103,8 @@ export default function ComparePlayers() {
         const fetchPlayerIdWithNames = async () => {
             const response = await getAllPlayersWithNames()
             const playersList = response.data
-            const shortPlayers = playersList.slice(0, 100)
 
-            const playerLabelValue = shortPlayers.map((player: { id: number; name: string }) => ({
+            const playerLabelValue = playersList.map((player: { id: number; name: string }) => ({
                 value: player.id.toString(),
                 label: player.name,
             }));
@@ -413,8 +412,8 @@ export default function ComparePlayers() {
                     </form>
                 </Form>
             </div>}
-            {showResult && <div className="flex flex-nowrap">
-                <div className="w-1/3 min-w-52 p-2 text-center">
+            {showResult && <div className="flex justify-center gap-x-4">
+                <div className="w-1/3 min-w-52 p-2 text-center flex justify-end h-fit">
                     <PlayerCompareProfile id={comparisonResponse?.player_left} name={comparisonResponse?.player_left_name}></PlayerCompareProfile>
                 </div>
 

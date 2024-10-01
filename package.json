@@ -35,6 +35,7 @@
     "react-hook-form": "^7.51.4",
     "react-icons": "^5.2.1",
     "react-router-dom": "^6.23.1",
+    "react-select": "^5.8.1",
     "react-sigma": "^1.2.35",
     "react-simple-maps": "^3.0.0",
     "tailwind-merge": "^2.3.0",
