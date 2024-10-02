@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import Select from "react-select";
-import { fetchSimilarPlayers, fetchNameAndImage, getPlayerSummary, comparePlayers} from "../api"; // added getPlayerSummary import
+import { fetchSimilarPlayers, fetchNameAndImage, getPlayerSummary, comparePlayers} from "../api";
 import { Network, DataSet, Options } from "vis-network/standalone";
 import "vis-network/styles/vis-network.css";
 import { Button } from "@/components/ui/button";
 import { getAllPlayersWithNames } from "@/api";
-import ClipLoader from "react-spinners/ClipLoader";
+import AsyncSelect from "react-select/async";
 
 interface PlayerNode {
   id: string;
@@ -34,6 +33,7 @@ const PlayerNetwork: React.FC = () => {
   const [playerName, setPlayerName] = useState<string | null>(null); // new state for player's name in the summary
   const [comparisonResult, setComparisonResult] = useState<any | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [physicsEnabled, setPhysicsEnabled] = useState(true);  // State for physics toggle
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -68,7 +68,7 @@ const PlayerNetwork: React.FC = () => {
     },
     edges: {
       color: "#cccccc",
-      width: 2,
+      width: 2, // Default width
       hoverWidth: 3,
       selectionWidth: 3,
     },
@@ -76,7 +76,7 @@ const PlayerNetwork: React.FC = () => {
       hover: true,
     },
     physics: {
-      enabled: true,
+      enabled: physicsEnabled,
       barnesHut: {
         gravitationalConstant: -3000,
         springLength: 200,
@@ -106,24 +106,24 @@ const PlayerNetwork: React.FC = () => {
     try {
       nodesRef.current.clear();
       edgesRef.current.clear();
-
+  
       const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
-
+  
       if (!playerInfo || !similarPlayers.length) {
         console.error("No player info or similar players found.");
         return;
       }
-
+  
       const centralNode: PlayerNode = {
         id: playerId,
         label: playerInfo.name,
         image: playerInfo.imageURL,
         group: "central",
       };
-
+  
       nodesRef.current.add(centralNode);
-
+  
       const similarPlayerNodes = await Promise.all(
         similarPlayers.map(async (player: { player_transfermarkt_id: string }) => {
           const similarPlayerInfo = await fetchNameAndImage(parseInt(player.player_transfermarkt_id, 10));
@@ -135,38 +135,39 @@ const PlayerNetwork: React.FC = () => {
           };
         })
       );
-
+  
       nodesRef.current.add(similarPlayerNodes.filter((node) => !nodesRef.current.get(node.id)));
-
+  
+      // Modify edges to include thickness based on distance
       edgesRef.current.add(
         similarPlayers.map((player: { player_transfermarkt_id: any; distance: any }) => ({
           from: playerId,
           to: player.player_transfermarkt_id,
-          weight: player.distance,
+          // Calculate the width based on distance
+          width: mapDistanceToWidth(player.distance),
         }))
       );
-
+  
       if (!networkRef.current) {
         const network = new Network(networkContainerRef.current!, { nodes: nodesRef.current, edges: edgesRef.current }, options);
         networkRef.current = network;
         networkRef.current.setOptions(options);
-
+  
+        // Event listeners remain unchanged
         network.on("click", function (params) {
           if (params.edges.length > 0) {
             const clickedEdgeId = params.edges[0];
             handleEdgeClick(clickedEdgeId); // Handle edge click for comparison
           }
         });
-        
-        // Single-click event to display player summary
+  
         network.on("click", function (params) {
           if (params.nodes.length > 0) {
             const clickedPlayerId = params.nodes[0];
             handlePlayerClick(clickedPlayerId); // Show the summary on single click
           }
         });
-
-        // Double-click event to expand network
+  
         network.on("doubleClick", function (params) {
           if (params.nodes.length > 0) {
             const clickedPlayerId = params.nodes[0];
@@ -233,12 +234,12 @@ const PlayerNetwork: React.FC = () => {
     try {
       const playerInfo = await fetchNameAndImage(parseInt(playerId, 10));
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
-
+  
       if (!playerInfo || !similarPlayers.length) {
         console.error("No player info or similar players found.");
         return;
       }
-
+  
       const similarPlayerNodes = await Promise.all(
         similarPlayers.map(async (player: { player_transfermarkt_id: string }) => {
           const similarPlayerInfo = await fetchNameAndImage(parseInt(player.player_transfermarkt_id, 10));
@@ -250,20 +251,26 @@ const PlayerNetwork: React.FC = () => {
           };
         })
       );
-
+  
       nodesRef.current.add(similarPlayerNodes.filter((node) => !nodesRef.current.get(node.id)));
-
+  
       const newEdges = similarPlayers.map((player: { player_transfermarkt_id: string; distance: number }) => ({
         from: playerId,
         to: player.player_transfermarkt_id,
-        weight: player.distance,
+        // Calculate the width based on distance
+        width: mapDistanceToWidth(player.distance),
       }));
 
-      const filteredEdges = newEdges.filter((edge: { from: any; to: any }) => {
-        const existingEdge = edgesRef.current.get({
-          filter: (item: { from: any; to: any }) => item.from === edge.from && item.to === edge.to,
+      const filteredEdges = newEdges.filter((edge: { from: string; to: string }) => {
+        // Check if an edge already exists in either direction
+        const existingEdgeFrom = edgesRef.current.get({
+          filter: (item: { from: string; to: string }) => item.from === edge.from && item.to === edge.to,
         });
-        return existingEdge.length === 0;
+        const existingEdgeTo = edgesRef.current.get({
+          filter: (item: { from: string; to: string }) => item.from === edge.to && item.to === edge.from,
+        });
+
+        return existingEdgeFrom.length === 0 && existingEdgeTo.length === 0; // Only add edge if it doesn't exist in either direction
       });
 
       edgesRef.current.add(filteredEdges);
@@ -279,6 +286,34 @@ const PlayerNetwork: React.FC = () => {
 
   const toggleHelp = () => setShowHelp(!showHelp);
 
+  const loadOptions = (inputValue: string, callback: (arg0: LabelValue[]) => void) => {
+    // Filter the player list based on the inputValue (search term)
+    const filteredPlayers = playerDataLabelAndValue.filter(player =>
+      player.label.toLowerCase().includes(inputValue.toLowerCase())
+    );
+    
+    // Limit the number of results shown to improve performance
+    const limitedPlayers = filteredPlayers.slice(0, 50); // Show only 10 players at a time
+    
+    callback(limitedPlayers);
+  };
+
+  const togglePhysics = () => {
+    setPhysicsEnabled((prev) => !prev); // Toggle the physics state
+    networkRef.current?.setOptions({ physics: { enabled: !physicsEnabled } }); // Update the network
+  };
+
+  const mapDistanceToWidth = (distance: number): number => {
+    // You can adjust these parameters to get the desired thickness
+    const minWidth = 2; // minimum edge thickness
+    const maxWidth = 15; // maximum edge thickness
+    const maxDistance = 45; // maximum distance for normalization
+  
+    // Normalize the distance and map to width
+    const normalizedWidth = Math.max(minWidth, Math.min(maxWidth, maxWidth * (1 - distance / maxDistance)));
+    return normalizedWidth;
+  };
+
   return (
     <div className="w-full flex justify-center relative">
       {/* Help Icon in the top-right corner */}
@@ -291,7 +326,7 @@ const PlayerNetwork: React.FC = () => {
 
       {/* Help Popup */}
       {showHelp && (
-        <div className="absolute top-14 right-10 bg-white border shadow-lg p-4 rounded-lg z-50">
+        <div className="absolute top-16 right-10 bg-white border shadow-lg p-4 rounded-lg z-50">
           <h3 className="text-lg font-semibold">How to Use the Player Network</h3>
           <p>Select a player from the dropdown to load their network.</p>
           <p>Click on players in the network to view their summary.</p>
@@ -306,17 +341,19 @@ const PlayerNetwork: React.FC = () => {
         <div className="w-1/4 pr-8 flex flex-col space-y-4"> 
         <h2 className="text-2xl font-semibold">Select Player</h2>
         <div className="flex flex-col space-y-4 w-full">
-          <Select
-            options={playerDataLabelAndValue}
-            value={selectedPlayer}
-            onChange={(selectedOption) => {
-              setSelectedPlayer(selectedOption);
-              setPlayerId(selectedOption?.value || null);
-            }}
-            placeholder="Select player..."
-            isClearable
-            className="w-full"
-          />
+        <AsyncSelect
+          cacheOptions
+          loadOptions={loadOptions}
+          defaultOptions={playerDataLabelAndValue.slice(0, 50)} // Show only the first 10 players initially
+          value={selectedPlayer}
+          onChange={(selectedOption) => {
+            setSelectedPlayer(selectedOption);
+            setPlayerId(selectedOption?.value || null);
+          }}
+          placeholder="Select player..."
+          isClearable
+          className="w-full"
+        />
 
           {/* Load button full width */}
           <Button
@@ -331,35 +368,82 @@ const PlayerNetwork: React.FC = () => {
             {isLoading ? "Loading..." : "Load Network"}
           </Button>
         </div>
-          
-          {/* Loading animation */}
-          {isLoading && (
-            <div className="flex justify-center pt-4">
-              <ClipLoader size={35} color="#2B7CE9" loading={isLoading} />
-            </div>
-          )}
 
           {/* Player Summary */}
-          {playerSummary && (
-            <div className="mt-4 p-4 border rounded shadow">
-              <h3 className="text-lg font-semibold">
-                Player Summary {playerName && `: ${playerName}`}
-              </h3>
-              <p>{playerSummary}</p>
+        {playerSummary && (
+          <div className="relative mt-4 p-4 border rounded shadow">
+            {/* Close Button */}
+            <div
+              className="absolute top-0 right-2 text-gray-500 cursor-pointer"
+              onClick={() => setPlayerSummary(null)}
+            >
+              ×
             </div>
-          )}
 
-          {comparisonResult && (
-            <div className="mt-4 p-4 border rounded shadow">
-              <h2 className="text-lg font-semibold">Player Comparison: {comparisonResult.player_left_name} vs {comparisonResult.player_right_name}</h2>
-                <p>{JSON.parse(comparisonResult.comparison).general}</p>
+            <h3 className="text-lg font-semibold">
+            {playerName && `${playerName}`}
+            </h3>
+
+            <div className="mt-2">
+              {playerSummary.split("**").map((section, index) => {
+                if (index % 2 !== 0) {
+                  return <strong key={index} className="block mt-2">{section}</strong>;
+                }
+                return (
+                  <p key={index} className="mt-1">
+                    {section.split("- ").map((part, idx) => (
+                      idx === 0 ? part : <span key={idx} className="block">• {part.trim()}</span>
+                    ))}
+                  </p>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Player Comparison */}
+        {comparisonResult && (
+          <div className="relative mt-4 p-4 border rounded shadow">
+            {/* Close Button */}
+            <div
+              className="absolute top-0 right-2 text-gray-500 cursor-pointer"
+              onClick={() => setComparisonResult(null)}
+            >
+              ×
+            </div>
+
+            <h2 className="text-lg font-semibold">{comparisonResult.player_left_name} vs {comparisonResult.player_right_name}</h2>
+
+            <div className="mt-2">
+              <p>{JSON.parse(comparisonResult.comparison).general}</p>
+            </div>
+          </div>
+        )}
         </div>
   
         {/* Section 2: Right Main Content Area */}
-        <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4">  {/* Consistent padding and top alignment with 'space-y-4' */}
-          <h2 className="text-2xl font-semibold">Player Network</h2>
+        <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold">Player Network</h2>
+            {/* Buttons for zoom-in, zoom-out, and physics toggle */}
+            <div className="flex space-x-2 pr-12">
+              <Button
+                onClick={() => networkRef.current?.moveTo({ scale: networkRef.current?.getScale() * 1.2 })}
+              >
+                Zoom In
+              </Button>
+              <Button
+                onClick={() => networkRef.current?.moveTo({ scale: networkRef.current?.getScale() * 0.8 })}
+              >
+                Zoom Out
+              </Button>
+              <Button
+                onClick={togglePhysics}
+              >
+                {physicsEnabled ? "Disable Physics" : "Enable Physics"}
+              </Button>
+            </div>
+          </div>
           {/* Network visualization area */}
           <div
             ref={networkContainerRef}
@@ -370,12 +454,12 @@ const PlayerNetwork: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               color: "grey",
+              position: "relative",
             }}
           >
             <p>Network will be displayed here once loaded.</p>
           </div>
         </div>
-        
       </div>
     </div>
   );
