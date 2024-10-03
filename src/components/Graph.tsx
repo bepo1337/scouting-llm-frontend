@@ -34,6 +34,7 @@ const PlayerNetwork: React.FC = () => {
   const [comparisonResult, setComparisonResult] = useState<any | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [physicsEnabled, setPhysicsEnabled] = useState(true);  // State for physics toggle
+  const [hasError, setHasError] = useState(false);
 
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
@@ -68,7 +69,7 @@ const PlayerNetwork: React.FC = () => {
     },
     edges: {
       color: "#cccccc",
-      width: 2, // Default width
+      width: 2, 
       hoverWidth: 3,
       selectionWidth: 3,
     },
@@ -103,6 +104,7 @@ const PlayerNetwork: React.FC = () => {
 
   const loadPlayerData = async (playerId: string) => {
     setIsLoading(true);
+    setHasError(false);
     try {
       nodesRef.current.clear();
       edgesRef.current.clear();
@@ -111,7 +113,7 @@ const PlayerNetwork: React.FC = () => {
       const similarPlayers = await fetchSimilarPlayers(parseInt(playerId, 10));
   
       if (!playerInfo || !similarPlayers.length) {
-        console.error("No player info or similar players found.");
+        console.error("No player info or similar players found. Select another player");
         return;
       }
   
@@ -180,6 +182,7 @@ const PlayerNetwork: React.FC = () => {
       }
     } catch (error) {
       console.error("Error loading player data:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -204,7 +207,7 @@ const PlayerNetwork: React.FC = () => {
   const handleEdgeClick = async (edgeId: string) => {
     const edge = edgesRef.current.get(edgeId);
     if (!edge) return;
-
+  
     const { from, to } = edge; // Extract player IDs from edge
     setIsLoading(true);
     try {
@@ -219,16 +222,25 @@ const PlayerNetwork: React.FC = () => {
         other: false,
         otherText: ""
       };
-
+  
       const comparison = await comparePlayers(comparisonPayload);
-      setComparisonResult(comparison); // Store the comparison result
+  
+      // Parse comparison JSON safely
+      let comparisonResultParsed;
+      try {
+        comparisonResultParsed = JSON.parse(comparison.comparison);
+      } catch (jsonError) {
+        throw new Error("Failed to parse comparison result JSON");
+      }
+  
+      setComparisonResult(comparisonResultParsed); // Store the comparison result
     } catch (error) {
-      console.error("Error fetching comparison:", error);
+      console.error("Error fetching comparison or parsing JSON:", error);
+      alert("An error occurred while comparing players. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
   const expandNetwork = async (playerId: string) => {
     setIsLoading(true);
     try {
@@ -305,8 +317,8 @@ const PlayerNetwork: React.FC = () => {
 
   const mapDistanceToWidth = (distance: number): number => {
     // You can adjust these parameters to get the desired thickness
-    const minWidth = 2; // minimum edge thickness
-    const maxWidth = 15; // maximum edge thickness
+    const minWidth = 1; // minimum edge thickness
+    const maxWidth = 10; // maximum edge thickness
     const maxDistance = 45; // maximum distance for normalization
   
     // Normalize the distance and map to width
@@ -412,13 +424,22 @@ const PlayerNetwork: React.FC = () => {
               ×
             </div>
 
-            <h2 className="text-lg font-semibold">{comparisonResult.player_left_name} vs {comparisonResult.player_right_name}</h2>
+            {/* Error Handling */}
+            {comparisonResult.errorMessage ? (
+              <div className="text-red-500">{comparisonResult.errorMessage}</div>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold">
+                  {comparisonResult.player_left_name} vs {comparisonResult.player_right_name}
+                </h2>
 
-            <div className="mt-2">
-              <p>{JSON.parse(comparisonResult.comparison).general}</p>
-            </div>
+                <div className="mt-2">
+                  <p>{comparisonResult.general}</p>
+                </div>
+              </>
+            )}
           </div>
-        )}
+          )}
         </div>
   
         {/* Section 2: Right Main Content Area */}
@@ -446,19 +467,23 @@ const PlayerNetwork: React.FC = () => {
           </div>
           {/* Network visualization area */}
           <div
-            ref={networkContainerRef}
-            style={{
-              height: "650px",
-              border: "1px solid #ddd",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              color: "grey",
-              position: "relative",
-            }}
-          >
+          ref={networkContainerRef}
+          style={{
+            height: "650px",
+            border: "1px solid #ddd",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "grey",
+            position: "relative",
+          }}
+        >
+          {hasError ? (
+            <p>Player information not found - please select another player.</p>
+          ) : (
             <p>Network will be displayed here once loaded.</p>
-          </div>
+          )}
+        </div>
         </div>
       </div>
     </div>
