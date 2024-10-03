@@ -13,7 +13,7 @@ export default function NavBar() {
             <NavigationMenuList>
                 <Link href="/">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Scouting as prompt ✨
+                        Scouting as Prompt ✨
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
