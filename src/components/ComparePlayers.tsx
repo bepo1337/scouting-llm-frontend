@@ -99,6 +99,7 @@ export default function ComparePlayers() {
         setOtherFilter(!otherFilter);
     }
 
+    // fetch player names and their ids when initially loading the component
     React.useEffect(() => {
         const fetchPlayerIdWithNames = async () => {
             const response = await getAllPlayersWithNames()
@@ -174,6 +175,7 @@ export default function ComparePlayers() {
         },
     })
 
+    // Submits the data 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         setIsLoading(true)
         setShowForm(false)

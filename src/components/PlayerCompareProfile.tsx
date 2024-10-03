@@ -83,6 +83,7 @@ export default function PlayerCompareProfile({ id, name }: ProfileProps) {
     const [playerImage, setPlayerImage] = React.useState("")
 
 
+    // Get player ids and names when loading component
     React.useEffect(() => {
         const fetchPlayerIdWithNames = async () => {
             const response = await fetchNameAndImage(id)

@@ -30,10 +30,11 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false)
   const [originalReports, setOriginalReports] = useState<string[]>([])
   const [fineGrainedReportState, setFineGrainedReportState] = useState<string>("")
-  // hier muss eine andere DS her, key --> {[]string und highlightedreport}
   const [playerToReports, setPlayerToReports] = useState<{ [key: number]: OriginalReportsAndFineGrainedReport }>({});
 
 
+
+  // When the player list changes, we want to ge tthe original reports of those players to show them
   useEffect(() => {
     const fetchReports = async () => {
       const fetchedReports: { [key: number]: OriginalReportsAndFineGrainedReport } = {};
@@ -66,6 +67,7 @@ export default function Chat() {
     },
   })
 
+  // send form (prompt, fine grained and position) back to the backend to get a list of players 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setPlayerList([])
     setIsLoading(true)
@@ -83,6 +85,7 @@ export default function Chat() {
     </SelectItem>
   ));
 
+  // change the shown original reports
   const setPlayerAndReports = (playerID: number) => {
     console.log(playerID)
     if (playerID == 0) {

@@ -28,6 +28,7 @@ function OriginalReports({ reports, fineGrainedReport }: OriginalReportsProps) {
     } while (team1Pic === opponentTeamFromHighlightedReportPic)
 
 
+    // returns the fine grained reports 
     const reportItems = reports
         .filter((report) => {
             return report != "" && report != fineGrainedReport
