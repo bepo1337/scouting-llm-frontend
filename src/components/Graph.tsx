@@ -157,7 +157,7 @@ const PlayerNetwork: React.FC = () => {
   
         // Event listeners remain unchanged
         network.on("click", function (params) {
-          if (params.edges.length > 0) {
+          if (params.edges.length > 0 && params.nodes.length === 0) {
             const clickedEdgeId = params.edges[0];
             handleEdgeClick(clickedEdgeId); // Handle edge click for comparison
           }
@@ -443,7 +443,7 @@ const PlayerNetwork: React.FC = () => {
         </div>
   
         {/* Section 2: Right Main Content Area */}
-        <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4">
+        <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4 sticky top-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">Player Network</h2>
             {/* Buttons for zoom-in, zoom-out, and physics toggle */}
