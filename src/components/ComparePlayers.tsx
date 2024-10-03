@@ -413,14 +413,14 @@ export default function ComparePlayers() {
                 </Form>
             </div>}
             {showResult && <div className="flex justify-center gap-x-4">
-                <div className="w-1/3 min-w-52 p-2 text-center flex justify-end h-fit">
+                <div className="w-1/3 min-w-52 p-2 text-center flex justify-end h-fit sticky top-0">
                     <PlayerCompareProfile id={comparisonResponse?.player_left} name={comparisonResponse?.player_left_name}></PlayerCompareProfile>
                 </div>
 
                 <div className="w-1/3 p-2 text-center">
                     <ComparePlayersTextArea text={comparisonResponse?.comparison}></ComparePlayersTextArea>
                 </div>
-                <div className="w-1/3 min-w-52 p-2 text-center">
+                <div className="w-1/3 min-w-52 p-2 text-center h-fit sticky top-0">
                     <PlayerCompareProfile id={comparisonResponse?.player_right} name={comparisonResponse?.player_right_name}></PlayerCompareProfile>
                 </div>
             </div>}

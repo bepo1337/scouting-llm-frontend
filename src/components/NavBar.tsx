@@ -25,23 +25,9 @@ export default function NavBar() {
                 </Link>
             </NavigationMenuList>
             <NavigationMenuList>
-                <Link href="/test">
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Test ⚒️
-                    </NavigationMenuLink>
-                </Link>
-            </NavigationMenuList>
-            <NavigationMenuList>
                 <Link href="/graph">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Visualization - Graph ⚒️
-                    </NavigationMenuLink>
-                </Link>
-            </NavigationMenuList>
-            <NavigationMenuList>
-                <Link href="/chat">
-                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Chat ⚒️
+                        Player Network 
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
