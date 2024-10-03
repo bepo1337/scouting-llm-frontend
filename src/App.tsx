@@ -4,7 +4,6 @@ import ScoutingAsPrompt from './components/ScoutingAsPrompt';
 import Chat from './components/Chat';
 import Graph from './components/Graph';
 import ComparePlayers from './components/ComparePlayers';
-import FilterableCombobox from './components/TestCombobox';
 
 function App() {
   return (
@@ -16,7 +15,6 @@ function App() {
             <Route path="/" element={<ScoutingAsPrompt ></ScoutingAsPrompt>} />
             <Route path="/compare" element={<ComparePlayers ></ComparePlayers>} />
             <Route path="/chat" element={<Chat></Chat>} />
-            <Route path="/test" element={<FilterableCombobox></FilterableCombobox>} />
             <Route path="/graph" element={<Graph></Graph>} />
           </Routes>
         </div>

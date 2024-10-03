@@ -335,7 +335,7 @@ export default function ComparePlayers() {
                                             <FormItem>
                                                 <FormLabel className="">Other attributions</FormLabel>
                                                 <FormControl>
-                                                    <Textarea className="h-64" placeholder="Player search prompt..." {...field} />
+                                                    <Textarea className="h-64" placeholder="Player search prompt (separated by ';')..." {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
