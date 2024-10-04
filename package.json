@@ -38,6 +38,7 @@
     "react-select": "^5.8.1",
     "react-sigma": "^1.2.35",
     "react-simple-maps": "^3.0.0",
+    "react-spinners": "^0.14.1",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "vis-network": "^9.1.9",
