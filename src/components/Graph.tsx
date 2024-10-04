@@ -224,16 +224,7 @@ const PlayerNetwork: React.FC = () => {
       };
   
       const comparison = await comparePlayers(comparisonPayload);
-  
-      // Parse comparison JSON safely
-      let comparisonResultParsed;
-      try {
-        comparisonResultParsed = JSON.parse(comparison.comparison);
-      } catch (jsonError) {
-        throw new Error("Failed to parse comparison result JSON");
-      }
-  
-      setComparisonResult(comparisonResultParsed); // Store the comparison result
+      setComparisonResult(comparison);
     } catch (error) {
       console.error("Error fetching comparison or parsing JSON:", error);
       alert("An error occurred while comparing players. Please try again.");
@@ -434,7 +425,7 @@ const PlayerNetwork: React.FC = () => {
                 </h2>
 
                 <div className="mt-2">
-                  <p>{comparisonResult.general}</p>
+                  <p>{JSON.parse(comparisonResult.comparison).general}</p>
                 </div>
               </>
             )}
