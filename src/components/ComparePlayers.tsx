@@ -5,7 +5,7 @@ import * as React from "react"
 import { ComparePlayerRequestPayload, ComparePlayerResponsePayload, comparePlayers, getAllPlayersWithNames } from "@/api"
 import { Button } from "@/components/ui/button"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import PlayerCompareProfile from "./PlayerCompareProfile"
@@ -15,6 +15,7 @@ import { Skeleton } from "./ui/skeleton"
 import { Switch } from "./ui/switch"
 import { Textarea } from "./ui/textarea"
 import ComparePlayersTextArea from "./ComparePlayersTextArea"
+import AsyncSelect from "react-select/async"
 
 interface LabelValue {
     value: string;
@@ -45,14 +46,11 @@ export default function ComparePlayers() {
     const [showResult, setShowResult] = useState(false)
     const [comparisonResponse, setComparisonResponse] = useState<ComparePlayerResponsePayload>()
 
-    // Searchbox
-    const [items, setItems] = React.useState<LabelValue[]>([]);        // All items from the backend
-    const [filteredItemsLeft, setFilteredItemsLeft] = useState<LabelValue[]>([]);  // Filtered items to display
-    const [filteredItemsRight, setFilteredItemsRight] = useState<LabelValue[]>([]);  // Filtered items to display
-    const [searchTermLeft, setSearchTermLeft] = useState<string>('');  // Search term entered by user
-    const [searchTermRight, setSearchTermRight] = useState<string>('');  // Search term entered by user
-    const [isDropdownOpenLeft, setIsDropdownOpenLeft] = useState<boolean>(false);  // Dropdown visibility
-    const [isDropdownOpenRight, setIsDropdownOpenRight] = useState<boolean>(false);  // Dropdown visibility
+    //select box
+    const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = useState<LabelValue[]>([]);
+    const [selectedPlayerLeft, setSelectedPlayerLeft] = useState<LabelValue | null>(null);
+    const [selectedPlayerRight, setSelectedPlayerRight] = useState<LabelValue | null>(null);
+
 
     // switch states
     const [all, setAll] = React.useState(false)
@@ -110,57 +108,11 @@ export default function ComparePlayers() {
                 label: player.name,
             }));
 
-            setItems(playerLabelValue);
-            setFilteredItemsLeft(playerLabelValue);  // Initially show all items
+            setPlayerDataLabelAndValue(playerLabelValue);
         }
         fetchPlayerIdWithNames()
     }, []) //need the empty array as second arguement, otherwise our backend endpoint will be called constantly
 
-    // change list when typing differnt query
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const lowerCasedSearchTerm = searchTermLeft.toLowerCase();
-            const filtered = items.filter((item) =>
-                item.label.toLowerCase().includes(lowerCasedSearchTerm)
-            );
-            setFilteredItemsLeft(filtered);
-        }, 300);  // we have a 300ms delay before the query-filter will apply
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTermLeft, items]);
-
-    // change list when typing differnt query
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            const lowerCasedSearchTerm = searchTermRight.toLowerCase();
-            const filtered = items.filter((item) =>
-                item.label.toLowerCase().includes(lowerCasedSearchTerm)
-            );
-            setFilteredItemsRight(filtered);
-        }, 300);  // we have a 300ms delay before the query-filter will apply
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTermRight, items]);
-
-    const handleInputChangeLeft = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTermLeft(e.target.value);
-        setIsDropdownOpenLeft(true);
-    };
-
-    const handleInputChangeRight = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTermRight(e.target.value);
-        setIsDropdownOpenRight(true);
-    };
-
-    const handleItemSelectLeft = (item: LabelValue) => {
-        setSearchTermLeft(item.label);
-        setIsDropdownOpenLeft(false);
-    };
-
-    const handleItemSelectRight = (item: LabelValue) => {
-        setSearchTermRight(item.label);
-        setIsDropdownOpenRight(false);
-    };
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -198,12 +150,24 @@ export default function ComparePlayers() {
         setShowResult(true)
     }
 
+    const loadOptions = (inputValue: string, callback: (arg0: LabelValue[]) => void) => {
+        // Filter the player list based on the inputValue (search term)
+        const filteredPlayers = playerDataLabelAndValue.filter(player =>
+            player.label.toLowerCase().includes(inputValue.toLowerCase())
+        );
+
+        const limitedPlayers = filteredPlayers.slice(0, 50);
+
+        callback(limitedPlayers);
+    };
+
     return (
         <div>
             {!showResult && <div className="w-full flex items-center justify-center ">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex flex-col justify-center items-center">
                         <div className="flex flex-row space-x-4">
+
                             <FormField
                                 control={form.control}
                                 name="player_left"
@@ -211,39 +175,19 @@ export default function ComparePlayers() {
                                     <FormItem className="flex flex-col">
                                         <FormLabel>Left Player</FormLabel>
                                         <div className="relative w-64">
-                                            <input
-                                                type="text"
-                                                className="w-full border border-gray-300 rounded-lg p-2"
-                                                placeholder="Search..."
-                                                value={searchTermLeft}
-                                                onChange={(e) => {
-                                                    handleInputChangeLeft(e);
-                                                    field.onChange(e.target.value);
+                                            <AsyncSelect
+                                                cacheOptions
+                                                loadOptions={loadOptions}
+                                                defaultOptions={playerDataLabelAndValue.slice(0, 50)}
+                                                value={selectedPlayerLeft}
+                                                onChange={(selectedOption) => {
+                                                    setSelectedPlayerLeft(selectedOption);
+                                                    field.onChange(selectedOption?.value)
                                                 }}
-                                                onFocus={() => setIsDropdownOpenLeft(true)}
+                                                placeholder="Search player..."
+                                                isClearable
+                                                className="w-full"
                                             />
-
-                                            {isDropdownOpenLeft && (
-                                                <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                                    {filteredItemsLeft.length > 0 ? (
-                                                        filteredItemsLeft.map((item) => (
-                                                            <div
-                                                                key={item.value}
-                                                                className="cursor-pointer p-2 hover:bg-gray-100"
-                                                                onClick={() => {
-                                                                    handleItemSelectLeft(item);
-                                                                    field.onChange(item.value);
-                                                                    setIsDropdownOpenLeft(false);
-                                                                }}
-                                                            >
-                                                                {item.label}
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <div className="p-2 text-gray-500">No player found</div>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
                                         <FormDescription>
                                             The first player we will use for the comparison
@@ -351,39 +295,19 @@ export default function ComparePlayers() {
                                         <FormLabel>Right Player</FormLabel>
                                         <FormMessage />
                                         <div className="relative w-64">
-                                            <input
-                                                type="text"
-                                                className="w-full border border-gray-300 rounded-lg p-2"
-                                                placeholder="Search..."
-                                                value={searchTermRight}
-                                                onChange={(e) => {
-                                                    handleInputChangeRight(e); // Update the local search term
-                                                    field.onChange(e.target.value); // Bind value to form field
+                                            <AsyncSelect
+                                                cacheOptions
+                                                loadOptions={loadOptions}
+                                                defaultOptions={playerDataLabelAndValue.slice(0, 50)}
+                                                value={selectedPlayerRight}
+                                                onChange={(selectedOption) => {
+                                                    setSelectedPlayerRight(selectedOption);
+                                                    field.onChange(selectedOption?.value)
                                                 }}
-                                                onFocus={() => setIsDropdownOpenRight(true)}
+                                                placeholder="Search player..."
+                                                isClearable
+                                                className="w-full"
                                             />
-
-                                            {isDropdownOpenRight && (
-                                                <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                                    {filteredItemsRight.length > 0 ? (
-                                                        filteredItemsRight.map((item) => (
-                                                            <div
-                                                                key={item.value}
-                                                                className="cursor-pointer p-2 hover:bg-gray-100"
-                                                                onClick={() => {
-                                                                    handleItemSelectRight(item);
-                                                                    field.onChange(item.value);
-                                                                    setIsDropdownOpenRight(false);
-                                                                }}
-                                                            >
-                                                                {item.label}
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <div className="p-2 text-gray-500">No player found</div>
-                                                    )}
-                                                </div>
-                                            )}
                                         </div>
                                         <FormDescription>
                                             The second player we will use for the comparison
