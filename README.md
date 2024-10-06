@@ -1,11 +1,12 @@
 # LLM4Scouting-Frontend
-This is the frontend client for the LLM4Scouting application. It offers a UI for the "Scouting as a Prompt", "Compare Players" and "Graph Visualization" features. They are further described in the [backend repository](https://github.com/bepo1337/scouting-llm).
+This is the frontend client for the LLM4Scouting application. It offers a UI for the "Scouting as a Prompt", "Compare Players" and "Player Network" features. They are further described in the [backend repository](https://github.com/bepo1337/scouting-llm).
 
 It was written using the following main technologies:
 - React
 - Vite
 - Shadcn
 - Tailwind
+- Vis
 
 ## Disclaimer 🎓
 This project is a university project for the course [Web Interfaces for Language Processing Systems](https://www.inf.uni-hamburg.de/en/inst/ab/lt/teaching/ma-projects/master-project-web-interfaces.html) at the [University of Hamburg](https://www.uni-hamburg.de/).

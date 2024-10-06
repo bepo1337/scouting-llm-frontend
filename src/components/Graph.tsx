@@ -25,6 +25,7 @@ interface LabelValue {
 }
 
 const PlayerNetwork: React.FC = () => {
+  // State hooks for managing data
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [playerDataLabelAndValue, setPlayerDataLabelAndValue] = useState<LabelValue[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<LabelValue | null>(null);
@@ -36,11 +37,13 @@ const PlayerNetwork: React.FC = () => {
   const [physicsEnabled, setPhysicsEnabled] = useState(true);  // State for physics toggle
   const [hasError, setHasError] = useState(false);
 
+  // Refs for network and dataset manipulation
   const networkContainerRef = useRef<HTMLDivElement>(null);
   const networkRef = useRef<Network | null>(null);
   const nodesRef = useRef<DataSet<PlayerNode>>(new DataSet());
   const edgesRef = useRef<DataSet<Edge>>(new DataSet());
 
+  // Options for the network visualization
   const options: Options = {
     width: "100%",
     height: "100%",
@@ -86,6 +89,7 @@ const PlayerNetwork: React.FC = () => {
     },
   };
 
+  // Fetch the player list with names when component mounts
   useEffect(() => {
     const fetchPlayerIdWithNames = async () => {
       const response = await getAllPlayersWithNames();
@@ -102,6 +106,7 @@ const PlayerNetwork: React.FC = () => {
     fetchPlayerIdWithNames();
   }, []);
 
+  // Load the player data and their similar players
   const loadPlayerData = async (playerId: string) => {
     setIsLoading(true);
     setHasError(false);
@@ -140,12 +145,10 @@ const PlayerNetwork: React.FC = () => {
   
       nodesRef.current.add(similarPlayerNodes.filter((node) => !nodesRef.current.get(node.id)));
   
-      // Modify edges to include thickness based on distance
       edgesRef.current.add(
         similarPlayers.map((player: { player_transfermarkt_id: any; distance: any }) => ({
           from: playerId,
           to: player.player_transfermarkt_id,
-          // Calculate the width based on distance
           width: mapDistanceToWidth(player.distance),
         }))
       );
@@ -155,7 +158,7 @@ const PlayerNetwork: React.FC = () => {
         networkRef.current = network;
         networkRef.current.setOptions(options);
   
-        // Event listeners remain unchanged
+        // Handle click and double-click events on the network
         network.on("click", function (params) {
           if (params.edges.length > 0 && params.nodes.length === 0) {
             const clickedEdgeId = params.edges[0];
@@ -188,14 +191,15 @@ const PlayerNetwork: React.FC = () => {
     }
   };
 
+  // Handle single player click to show their summary
   const handlePlayerClick = async (playerId: string) => {
     setIsLoading(true);
     try {
       const summary = await getPlayerSummary(parseInt(playerId, 10));
-      const playerInfo = await fetchNameAndImage(parseInt(playerId, 10)); // Fetch the player's name for the summary
+      const playerInfo = await fetchNameAndImage(parseInt(playerId, 10)); 
 
       setPlayerSummary(summary);
-      setPlayerName(playerInfo.name); // Set the player name in state
+      setPlayerName(playerInfo.name); 
     } catch (error) {
       console.error("Error fetching player summary:", error);
     } finally {
@@ -203,18 +207,18 @@ const PlayerNetwork: React.FC = () => {
     }
   };
 
-  // Function to handle edge click and fetch comparison
+  // Handle edge click to compare two players
   const handleEdgeClick = async (edgeId: string) => {
     const edge = edgesRef.current.get(edgeId);
     if (!edge) return;
   
-    const { from, to } = edge; // Extract player IDs from edge
+    const { from, to } = edge;
     setIsLoading(true);
     try {
       const comparisonPayload = {
         player_left: parseInt(from, 10),
         player_right: parseInt(to, 10),
-        all: true, // You can adjust the criteria as needed
+        all: true, 
         offensive: false,
         defensive: false,
         strenghts: false,
@@ -232,6 +236,8 @@ const PlayerNetwork: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Expand the network by fetching similar players of the selected player
   const expandNetwork = async (playerId: string) => {
     setIsLoading(true);
     try {
@@ -260,12 +266,10 @@ const PlayerNetwork: React.FC = () => {
       const newEdges = similarPlayers.map((player: { player_transfermarkt_id: string; distance: number }) => ({
         from: playerId,
         to: player.player_transfermarkt_id,
-        // Calculate the width based on distance
         width: mapDistanceToWidth(player.distance),
       }));
 
       const filteredEdges = newEdges.filter((edge: { from: string; to: string }) => {
-        // Check if an edge already exists in either direction
         const existingEdgeFrom = edgesRef.current.get({
           filter: (item: { from: string; to: string }) => item.from === edge.from && item.to === edge.to,
         });
@@ -273,7 +277,7 @@ const PlayerNetwork: React.FC = () => {
           filter: (item: { from: string; to: string }) => item.from === edge.to && item.to === edge.from,
         });
 
-        return existingEdgeFrom.length === 0 && existingEdgeTo.length === 0; // Only add edge if it doesn't exist in either direction
+        return existingEdgeFrom.length === 0 && existingEdgeTo.length === 0;
       });
 
       edgesRef.current.add(filteredEdges);
@@ -287,41 +291,43 @@ const PlayerNetwork: React.FC = () => {
     }
   };
 
-  const toggleHelp = () => setShowHelp(!showHelp);
+  // Map the similarity distance to edge width
+  const mapDistanceToWidth = (distance: number): number => {
+    const minWidth = 1; // minimum edge thickness
+    const maxWidth = 10; // maximum edge thickness
+    const maxDistance = 45; // maximum distance for normalization
 
+    const normalizedWidth = Math.max(minWidth, Math.min(maxWidth, maxWidth * (1 - distance / maxDistance)));
+    return normalizedWidth;
+  };
+
+  // Fetch options asynchronously for the player selection dropdown
   const loadOptions = (inputValue: string, callback: (arg0: LabelValue[]) => void) => {
-    // Filter the player list based on the inputValue (search term)
     const filteredPlayers = playerDataLabelAndValue.filter(player =>
       player.label.toLowerCase().includes(inputValue.toLowerCase())
     );
     
-    // Limit the number of results shown to improve performance
-    const limitedPlayers = filteredPlayers.slice(0, 50); // Show only 10 players at a time
+    const limitedPlayers = filteredPlayers.slice(0, 50); 
     
     callback(limitedPlayers);
   };
 
+  // Toggle the physics simulation in the network
   const togglePhysics = () => {
     setPhysicsEnabled((prev) => !prev); // Toggle the physics state
     networkRef.current?.setOptions({ physics: { enabled: !physicsEnabled } }); // Update the network
   };
 
-  const mapDistanceToWidth = (distance: number): number => {
-    // You can adjust these parameters to get the desired thickness
-    const minWidth = 1; // minimum edge thickness
-    const maxWidth = 10; // maximum edge thickness
-    const maxDistance = 45; // maximum distance for normalization
-  
-    // Normalize the distance and map to width
-    const normalizedWidth = Math.max(minWidth, Math.min(maxWidth, maxWidth * (1 - distance / maxDistance)));
-    return normalizedWidth;
-  };
+  // Toggle the help popup
+  const toggleHelp = () => setShowHelp(!showHelp);
 
+  
+  // Render the component
   return (
     <div className="w-full flex justify-center relative">
       {/* Help Icon in the top-right corner */}
       <div
-        className="absolute top-0 right-8 bg-gray-300 rounded-full w-10 h-10 flex justify-center items-center cursor-pointer"
+        className="absolute top-0 right-8 bg-gray-300 rounded-full w-10 h-10 flex justify-center items-center cursor-pointer z-50"
         onClick={toggleHelp}
       >
         <span className="text-xl font-bold text-white">?</span>
@@ -347,7 +353,7 @@ const PlayerNetwork: React.FC = () => {
         <AsyncSelect
           cacheOptions
           loadOptions={loadOptions}
-          defaultOptions={playerDataLabelAndValue.slice(0, 50)} // Show only the first 10 players initially
+          defaultOptions={playerDataLabelAndValue.slice(0, 50)}
           value={selectedPlayer}
           onChange={(selectedOption) => {
             setSelectedPlayer(selectedOption);

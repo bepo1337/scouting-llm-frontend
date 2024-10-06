@@ -27,7 +27,7 @@ export default function NavBar() {
             <NavigationMenuList>
                 <Link href="/graph">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Player Network 
+                        Player Network 🕸️
                     </NavigationMenuLink>
                 </Link>
             </NavigationMenuList>
