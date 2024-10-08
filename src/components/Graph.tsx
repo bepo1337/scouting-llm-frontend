@@ -294,7 +294,7 @@ const PlayerNetwork: React.FC = () => {
   // Map the similarity distance to edge width
   const mapDistanceToWidth = (distance: number): number => {
     const minWidth = 1; // minimum edge thickness
-    const maxWidth = 10; // maximum edge thickness
+    const maxWidth = 14; // maximum edge thickness
     const maxDistance = 45; // maximum distance for normalization
 
     const normalizedWidth = Math.max(minWidth, Math.min(maxWidth, maxWidth * (1 - distance / maxDistance)));
@@ -325,23 +325,6 @@ const PlayerNetwork: React.FC = () => {
   // Render the component
   return (
     <div className="w-full flex justify-center relative">
-      {/* Help Icon in the top-right corner */}
-      <div
-        className="absolute top-0 right-8 bg-gray-300 rounded-full w-10 h-10 flex justify-center items-center cursor-pointer z-50"
-        onClick={toggleHelp}
-      >
-        <span className="text-xl font-bold text-white">?</span>
-      </div>
-
-      {/* Help Popup */}
-      {showHelp && (
-        <div className="absolute top-16 right-10 bg-white border shadow-lg p-4 rounded-lg z-50">
-          <h3 className="text-lg font-semibold">How to Use the Player Network</h3>
-          <p>Select a player from the dropdown to load their network.</p>
-          <p>Click on players in the network to view their summary.</p>
-          <p>Double-click on a player to expand their network of similar players.</p>
-        </div>
-      )}
       
       {/* Main container with two sections */}
       <div className="w-full flex justify-between pt-0 p-8 items-start">
@@ -460,6 +443,22 @@ const PlayerNetwork: React.FC = () => {
               >
                 {physicsEnabled ? "Disable Physics" : "Enable Physics"}
               </Button>
+              <div
+                className="absolute top-0 right-0 bg-gray-300 rounded-full w-10 h-10 flex justify-center items-center cursor-pointer z-50"
+                onClick={toggleHelp}
+              >
+                <span className="text-xl font-bold text-white">?</span>
+              </div>
+
+              {/* Help Popup */}
+              {showHelp && (
+                <div className="absolute top-16 right-2 bg-white border shadow-lg p-4 rounded-lg z-50">
+                  <h3 className="text-lg font-semibold">How to Use the Player Network</h3>
+                  <p>Select a player from the dropdown to load their network.</p>
+                  <p>Click on players in the network to view their summary.</p>
+                  <p>Double-click on a player to expand their network of similar players.</p>
+                </div>
+              )}
             </div>
           </div>
           {/* Network visualization area */}
