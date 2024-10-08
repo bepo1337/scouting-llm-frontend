@@ -68,7 +68,7 @@ function OriginalReports({ reports, fineGrainedReport }: OriginalReportsProps) {
 
     return (
         <>
-            <h1 className='text-2xl mb-8'>{reports.length == 0 ? "Select a player to see original reports" : "Original reports"}</h1>
+            <h1 className='text-2xl font-medium mb-8'>{reports.length == 0 ? "Select a player to see original reports" : "Original reports"}</h1>
             <div className='mb-10 shadow-2xl'>
                 {fineGrainedReport !== "" &&
                 <div>                 

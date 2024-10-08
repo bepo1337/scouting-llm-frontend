@@ -104,7 +104,7 @@ export default function Chat() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-8 border-r-2 pr-6 flex">
           <div className="flex flex-col w-min space-y-7 !mt-0 border-r-2 pr-10">  
-          <h2 className="text-2xl font">Optional parameters</h2>
+          <h2 className="text-2xl font font-medium">Optional parameters</h2>
             <FormField
             control={form.control}
             name="fineGrained"

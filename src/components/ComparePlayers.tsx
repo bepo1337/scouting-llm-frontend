@@ -197,7 +197,7 @@ export default function ComparePlayers() {
                             />
                             {showForm &&
                                 <div className="space-y-4 border-r-2 border-l-2 pl-8 pr-8">
-                                    <h1 className="text-xl font-bold">Filters for comparison</h1>
+                                    <h1 className="text-2xl font-medium">Filters for comparison</h1>
                                     <div className="space-y-4">
                                         <FormField control={form.control}
                                             name="all"

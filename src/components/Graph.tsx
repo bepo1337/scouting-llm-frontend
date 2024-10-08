@@ -331,7 +331,7 @@ const PlayerNetwork: React.FC = () => {
         
         {/* Section 1: Left Sidebar */}
         <div className="w-1/4 pr-8 flex flex-col space-y-4"> 
-        <h2 className="text-2xl font-semibold">Select Player</h2>
+        <h2 className="text-2xl font-medium">Select Player</h2>
         <div className="flex flex-col space-y-4 w-full">
         <AsyncSelect
           cacheOptions
@@ -372,7 +372,7 @@ const PlayerNetwork: React.FC = () => {
               ×
             </div>
 
-            <h3 className="text-lg font-semibold">
+            <h3 className="text-lg font-medium">
             {playerName && `${playerName}`}
             </h3>
 
@@ -425,7 +425,7 @@ const PlayerNetwork: React.FC = () => {
         {/* Section 2: Right Main Content Area */}
         <div className="w-3/4 border-l-2 pl-8 flex flex-col space-y-4 sticky top-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Player Network</h2>
+            <h2 className="text-2xl font-medium">Player Network</h2>
             {/* Buttons for zoom-in, zoom-out, and physics toggle */}
             <div className="flex space-x-2 pr-12">
               <Button
